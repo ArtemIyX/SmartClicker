@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartClicker_WPF"
+        xmlns:vm="clr-namespace:SmartClicker_WPF.ViewModels"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Width="640"
@@ -16,12 +17,15 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        d:DataContext="{d:DesignInstance Type=vm:MainVM}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="35*"/>
             <ColumnDefinition Width="65*"/>
         </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding Test}"></TextBlock>
+        <Button Command="{Binding ClickCommand}" Cursor="Hand">124234</Button>
         <StackPanel Orientation="Vertical" Margin="5">
             <GroupBox Header="Main" Margin="5">
                 <StackPanel>
