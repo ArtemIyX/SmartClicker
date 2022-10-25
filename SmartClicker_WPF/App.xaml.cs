@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SmartClicker_WPF.Services;
+using SmartClicker_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -27,7 +28,9 @@ namespace SmartClicker_WPF
         private void ConfigureServices(ServiceCollection services)
         {
             services.AddSingleton<MainWindow>();
-            services.AddTransient<InputService>();
+            services.AddScoped<SettingsService>();
+            services.AddScoped<InputService>();
+            services.AddScoped<MainVM>();
         }
 
         private void OnStartup(object sender, StartupEventArgs e)

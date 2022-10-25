@@ -27,10 +27,10 @@ namespace SmartClicker_WPF
 
         private InputService _inputService;
 
-        public MainWindow(InputService inputService)
+        public MainWindow(InputService inputService, MainVM mainVM)
         {
             _inputService = inputService;
-            this.DataContext = new MainVM();
+            this.DataContext = mainVM;
             InitializeComponent();
         }
     }
