@@ -1,7 +1,9 @@
-﻿using System;
+﻿using SmartClicker_WPF.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +22,10 @@ namespace SmartClicker_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private InputService _inputService;
+        public MainWindow(InputService inputService)
         {
+            _inputService = inputService;
             InitializeComponent();
         }
     }

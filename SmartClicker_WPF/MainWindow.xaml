@@ -4,13 +4,74 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartClicker_WPF"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Smart clicker" Height="450" Width="800">
+        Width="640"
+        Height="600"
+        Title="Smart ad clicker"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="35*"/>
+            <ColumnDefinition Width="65*"/>
         </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical" Margin="5">
+            <GroupBox Header="Main" Margin="5">
+                <StackPanel>
+                    <StackPanel HorizontalAlignment="Left" Margin="5">
+                        <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Driver</TextBlock>
+                        <ComboBox Name="comboBox_Driver" MinWidth="150"/>
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Left" Margin="5">
+                        <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Site url</TextBlock>
+                        <TextBox Name="textBox_SiteUrl"  
+                                 md:HintAssist.Hint="Enter site url" MinWidth="150"/>
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Left" Margin="5">
+                        <TextBlock 
+                                   Style="{DynamicResource MaterialDesignOverlineTextBlock}">Timeout</TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox md:HintAssist.Hint="300" Width="50"/>
+                            <TextBlock Text="Sec" Style="{DynamicResource MaterialDesignCharacterCounterTextBlock}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Left" Margin="5">
+                        <TextBlock 
+                                   Style="{DynamicResource MaterialDesignOverlineTextBlock}">Loops</TextBlock>
+                        <TextBox md:HintAssist.Hint="10" Width="50"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Detect" Margin="5" VerticalAlignment="Stretch">
+                <StackPanel Margin="5">
+                    <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Ad detection</TextBlock>
+                    <Border Background="{DynamicResource MaterialDesignChipBackground}" 
+                            CornerRadius="10">
+                        <ListBox HorizontalAlignment="Stretch" Margin="5"
+                             Height="120" Style="{DynamicResource MaterialDesignCardsListBox}"
+                                 md:ScrollBarAssist.ButtonsVisibility="Visible">
+                        </ListBox>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Margin="2" Cursor="Hand">
+                            <TextBlock>Remove</TextBlock>
+                        </Button>
+                        <Button Margin="2" Cursor="Hand">
+                            <TextBlock>Add</TextBlock>
+                        </Button>
+                    </StackPanel>
+                    
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
 
     </Grid>
 </Window>
