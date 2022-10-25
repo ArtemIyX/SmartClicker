@@ -44,24 +44,38 @@
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Site url</TextBlock>
                         <TextBox Name="textBox_SiteUrl"  
-                                 md:HintAssist.Hint="Enter site url" MinWidth="150"
-                                 Text="{Binding SiteUrl}"/>
+                                 md:HintAssist.Hint="Enter site url" MinWidth="150">
+                            <Binding Path="SiteUrl" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <valids:NotNulTextValidation/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox>
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock 
                                    Style="{DynamicResource MaterialDesignOverlineTextBlock}">Timeout</TextBlock>
                         <StackPanel Orientation="Horizontal">
-                            <TextBox md:HintAssist.Hint="300" Width="50"
-                                     Text="{Binding TimeOut}"/>
+                            <TextBox md:HintAssist.Hint="300" Width="50">
+                                <Binding Path="TimeOut" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <valids:NumericTextBoxValidation/>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox>
                             <TextBlock Text="Sec" Style="{DynamicResource MaterialDesignCharacterCounterTextBlock}"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock Text="Loops"
                                    Style="{DynamicResource MaterialDesignOverlineTextBlock}">Loops</TextBlock>
-                        <TextBox Text="{Binding Loops}"
+                        <TextBox 
                                  md:HintAssist.Hint="10" Width="50">
-                            
+                            <Binding Path="Loops" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <valids:NumericTextBoxValidation/>
+                                </Binding.ValidationRules>
+                            </Binding>
                         </TextBox>
                     </StackPanel>
 

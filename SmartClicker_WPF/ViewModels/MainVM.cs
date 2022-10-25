@@ -27,6 +27,7 @@ namespace SmartClicker_WPF.ViewModels
             _selectedDriver = Drivers[0];
             _timeOut = 60;
             _loops = 5;
+            _siteUrl = @"101gardentools.com";
         }
 
         [ObservableProperty]
