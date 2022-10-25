@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.Models
 {
-    public enum DriverType
+    public enum WebDriverType
     {
         Edge,
         Chrome,

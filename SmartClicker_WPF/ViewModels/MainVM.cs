@@ -5,6 +5,7 @@ using SmartClicker_WPF.Models;
 using SmartClicker_WPF.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -22,8 +23,26 @@ namespace SmartClicker_WPF.ViewModels
         {
             _settingsService = SettingsService;
             _settingsJson = _settingsService.GetSettingsObject();
+            _drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
+            _selectedDriver = Drivers[0];
+            _timeOut = 60;
+            _loops = 5;
         }
 
-        public string? Test => _settingsJson.ChromeDriverPath;
+        [ObservableProperty]
+        private int _timeOut;
+
+        [ObservableProperty]
+        private string _siteUrl;
+
+        [ObservableProperty]
+        private int _loops;
+
+        [ObservableProperty]
+        private ObservableCollection<Driver> _drivers;
+
+        [ObservableProperty]
+        private Driver _selectedDriver;
+
     }
 }

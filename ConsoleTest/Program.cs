@@ -14,14 +14,21 @@ public class Program
     private static WebDriver webDriver { get; set; } = null!;
     private static string driverPath { get; set; }
     private static string baseUrl { get; set; }
+    public enum Test
+    {
+        my_enum,
+        test_b, 
+        good
+    }
     public static void Main(string[] args)
     {
-        driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";
-        baseUrl = @"https://www.google.com/";
-        webDriver = GetChromeDriver();
-        webDriver.Navigate().GoToUrl(baseUrl);
-        Thread.Sleep(5000);
-        var search_form = GetGoogleSearchMainInput();
+        /* driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";
+         baseUrl = @"https://www.google.com/";
+         webDriver = GetChromeDriver();
+         webDriver.Navigate().GoToUrl(baseUrl);
+         Thread.Sleep(5000);
+         var search_form = GetGoogleSearchMainInput();*/
+        Console.WriteLine(Test.good.ToString());
     }
 
     public static IWebElement GetGoogleSearchMainInput()

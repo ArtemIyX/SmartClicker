@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartClicker_WPF"
         xmlns:vm="clr-namespace:SmartClicker_WPF.ViewModels"
+        xmlns:mm="clr-namespace:SmartClicker_WPF.Models"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:valids="clr-namespace:SmartClicker_WPF.Validations"
         mc:Ignorable="d"
         Width="640"
         Height="600"
@@ -24,31 +26,43 @@
             <ColumnDefinition Width="35*"/>
             <ColumnDefinition Width="65*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{Binding Test}"></TextBlock>
         <StackPanel Orientation="Vertical" Margin="5">
             <GroupBox Header="Main" Margin="5">
                 <StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Driver</TextBlock>
-                        <ComboBox Name="comboBox_Driver" MinWidth="150"/>
+                        <ComboBox Name="comboBox_Driver" MinWidth="150"
+                                  ItemsSource="{Binding Drivers}"
+                                  SelectedItem="{Binding SelectedDriver}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type mm:Driver}">
+                                    <TextBlock Text="{Binding Title}"></TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Site url</TextBlock>
                         <TextBox Name="textBox_SiteUrl"  
-                                 md:HintAssist.Hint="Enter site url" MinWidth="150"/>
+                                 md:HintAssist.Hint="Enter site url" MinWidth="150"
+                                 Text="{Binding SiteUrl}"/>
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock 
                                    Style="{DynamicResource MaterialDesignOverlineTextBlock}">Timeout</TextBlock>
                         <StackPanel Orientation="Horizontal">
-                            <TextBox md:HintAssist.Hint="300" Width="50"/>
+                            <TextBox md:HintAssist.Hint="300" Width="50"
+                                     Text="{Binding TimeOut}"/>
                             <TextBlock Text="Sec" Style="{DynamicResource MaterialDesignCharacterCounterTextBlock}"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
-                        <TextBlock 
+                        <TextBlock Text="Loops"
                                    Style="{DynamicResource MaterialDesignOverlineTextBlock}">Loops</TextBlock>
-                        <TextBox md:HintAssist.Hint="10" Width="50"/>
+                        <TextBox Text="{Binding Loops}"
+                                 md:HintAssist.Hint="10" Width="50">
+                            
+                        </TextBox>
                     </StackPanel>
 
                 </StackPanel>
