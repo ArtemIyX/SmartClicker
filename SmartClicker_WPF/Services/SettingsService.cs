@@ -16,9 +16,9 @@ namespace SmartClicker_WPF.Services
         private SettingsJson LoadDefaultSettingsObject()
             => new SettingsJson()
             {
-                EdgeDriverPath = "edgedriver_win64",
-                FirefoxDriverPath = "geckodriver-v0.32.0-win32",
-                ChromeDriverPath = "chromedriver_win32"
+                EdgeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "edgedriver_win64",
+                FirefoxDriverPath = AppDomain.CurrentDomain.BaseDirectory + "geckodriver-v0.32.0-win32",
+                ChromeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32"
             };
         private string FullSavePath => AppDomain.CurrentDomain.BaseDirectory + SavePath;
 
