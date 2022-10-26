@@ -16,57 +16,62 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance Type=vm:NewDetectVM}"
         Title="New ad detection" 
-        Height="350" Width="400">
+        Height="350" Width="400"
+        MinHeight="350" MinWidth="400">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Margin="5">
+        <Grid Grid.Column="0" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="45"/>
+            </Grid.RowDefinitions>
             <StackPanel Margin="2">
                 <TextBlock Text="Type"/>
                 <ComboBox ItemsSource="{Binding DetectTypes}" SelectedIndex="{Binding SelectedDetectTypeIndex}"/>
             </StackPanel>
-            <StackPanel Margin="2" VerticalAlignment="Stretch">
-                <TextBlock Text="Values"/>
-                <Border Background="{DynamicResource MaterialDesignChipBackground}" 
-                            CornerRadius="10">
-                    <ListBox ItemsSource="{Binding Values}" Margin="4"
-                         SelectedIndex="{Binding SelectedValueIndex}"
-                            Height="150">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type mm:DetectValue}">
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Command="{Binding DataContext.RemoveValueCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+            <TextBlock Text="Values" Grid.Row="1"/>
+            <Border Background="{DynamicResource MaterialDesignChipBackground}" 
+                            CornerRadius="10"
+                    Grid.Row="2">
+                <ListBox ItemsSource="{Binding Values}" Margin="4"
+                         SelectedIndex="{Binding SelectedValueIndex}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type mm:DetectValue}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Command="{Binding DataContext.RemoveValueCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}"
                                             VerticalAlignment="Center" 
                                             Margin="2" Width="16" Height="16" 
                                             Style="{DynamicResource MaterialDesignIconButton}">
-                                        <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </Button>
-                                    <TextBlock Text="{Binding Header}" Margin="2" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
+                                    <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Button>
+                                <TextBlock Text="{Binding Header}" Margin="2" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
 
-                    </ListBox>
-                </Border>
-                
-                <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Right">
-                    <TextBox md:HintAssist.Hint="Value" 
+                </ListBox>
+            </Border>
+            <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Right" Grid.Row="3">
+                <TextBox md:HintAssist.Hint="Value" 
                              Width="100"
                              VerticalAlignment="Center" 
                              Margin="3"
                              Text="{Binding NewValue, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Command="{Binding AddNewValueCommand}">
-                        <TextBlock Text="Add" FontSize="12"/>
-                    </Button>
-                </StackPanel>
-
+                <Button Command="{Binding AddNewValueCommand}">
+                    <TextBlock Text="Add" FontSize="12"/>
+                </Button>
             </StackPanel>
-        </StackPanel>
+
+        </Grid>
+        
     </Grid>
 </Window>
