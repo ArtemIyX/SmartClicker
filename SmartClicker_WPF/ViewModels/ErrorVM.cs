@@ -14,14 +14,14 @@ namespace SmartClicker_WPF.ViewModels
     {
         public ErrorVM()
         {
-            ErrorTitle = "Error";
-            Message = "Unknwon";
+            this.ErrorTitle = "Error";
+            this.Message = "Unknwon";
         }
 
         public ErrorVM(string Title, string Msg)
         {
-            ErrorTitle = Title;
-            Message = Msg;
+            this.ErrorTitle = Title;
+            this.Message = Msg;
         }
 
         [ObservableProperty]

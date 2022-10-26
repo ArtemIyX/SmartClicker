@@ -88,14 +88,23 @@
                             CornerRadius="10">
                         <ListBox HorizontalAlignment="Stretch" Margin="5"
                              Height="120" Style="{DynamicResource MaterialDesignCardsListBox}"
-                                 md:ScrollBarAssist.ButtonsVisibility="Visible">
+                                 md:ScrollBarAssist.ButtonsVisibility="Visible"
+                                 SelectedItem="{Binding SelectedDetect}"
+                                 ItemsSource="{Binding Detects}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type mm:AdDetect}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Type}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                         </ListBox>
                     </Border>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Margin="2" Cursor="Hand">
+                        <Button Margin="2" Cursor="Hand" Command="{Binding RemoveDetectCommand}">
                             <TextBlock>Remove</TextBlock>
                         </Button>
-                        <Button Margin="2" Cursor="Hand">
+                        <Button Margin="2" Cursor="Hand" Command="{Binding AddDetectCommand}">
                             <TextBlock>Add</TextBlock>
                         </Button>
                     </StackPanel>

@@ -38,16 +38,19 @@ namespace SmartClicker_WPF
 
         private void ConfigureServices(ServiceCollection services)
         {
+            services.AddSingleton<FooManager>();
             services.AddSingleton<MainWindow>();
             services.AddScoped<SettingsService>();
             services.AddScoped<InputService>();
             services.AddScoped<MainVM>();
+            services.AddScoped<NewDetectVM>();
+            services.AddScoped<NewDetectWindow>();
         }
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
             var mainWindow = ServiceProvider.GetService<MainWindow>();
-            mainWindow.Show();
+            mainWindow?.Show();
         }
     }
 }
