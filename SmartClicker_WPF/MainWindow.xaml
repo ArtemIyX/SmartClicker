@@ -10,7 +10,9 @@
         xmlns:valids="clr-namespace:SmartClicker_WPF.Validations"
         mc:Ignorable="d"
         Width="640"
+        MinWidth="640"
         Height="600"
+        MinHeight="600"
         Title="Smart ad clicker"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -19,14 +21,19 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance Type=vm:MainVM}">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="35*"/>
-            <ColumnDefinition Width="65*"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="250"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
             <GroupBox Header="Main" Margin="5">
                 <StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
@@ -81,13 +88,20 @@
 
                 </StackPanel>
             </GroupBox>
-            <GroupBox Header="Detect" Margin="5" VerticalAlignment="Stretch">
-                <StackPanel Margin="5">
-                    <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Ad detection</TextBlock>
+
+            <GroupBox Header="Detect" Margin="5" VerticalAlignment="Stretch" Grid.Row="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}" Text="Ad detection"/> 
                     <Border Background="{DynamicResource MaterialDesignChipBackground}" 
-                            CornerRadius="10">
+                            CornerRadius="10"
+                            Grid.Row="1">
                         <ListBox HorizontalAlignment="Stretch" Margin="5"
-                             Height="120" Style="{DynamicResource MaterialDesignCardsListBox}"
+                                 Style="{DynamicResource MaterialDesignCardsListBox}"
                                  md:ScrollBarAssist.ButtonsVisibility="Visible"
                                  SelectedItem="{Binding SelectedDetect}"
                                  ItemsSource="{Binding Detects}">
@@ -100,7 +114,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </Border>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
                         <Button Margin="2" Cursor="Hand" Command="{Binding RemoveDetectCommand}">
                             <TextBlock>Remove</TextBlock>
                         </Button>
@@ -108,10 +122,9 @@
                             <TextBlock>Add</TextBlock>
                         </Button>
                     </StackPanel>
-                    
-                </StackPanel>
+                </Grid>
             </GroupBox>
-        </StackPanel>
-
+        </Grid>
+        
     </Grid>
 </Window>
