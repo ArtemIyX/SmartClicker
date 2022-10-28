@@ -18,12 +18,11 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance Type=vm:NewDetectVM}"
-        Title="New ad detection" 
-        Height="350" Width="400"
-        MinHeight="350" MinWidth="400">
+        Title="Ad detection" 
+        Height="350" Width="250"
+        MinHeight="350" MinWidth="250">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0" Margin="5">
@@ -31,7 +30,7 @@
                 <RowDefinition Height="45"/>
                 <RowDefinition Height="16"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="45"/>
+                <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
             <StackPanel Margin="2">
                 <TextBlock Text="Type"/>
@@ -75,10 +74,13 @@
                              Margin="3"
                              Text="{Binding NewValue, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Command="{Binding AddNewValueCommand}">
-                    <TextBlock Text="Add" FontSize="12"/>
+                    <TextBlock Text="Add" FontSize="12" Margin="2"/>
+                </Button>
+                <Button Click="Button_Click" Margin="2" Cursor="Hand">
+                    <TextBlock Text="Ok" FontSize="12"/>
                 </Button>
             </StackPanel>
-
+            
         </Grid>
         
     </Grid>

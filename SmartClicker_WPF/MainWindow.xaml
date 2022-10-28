@@ -25,7 +25,7 @@
         d:DataContext="{d:DesignInstance Type=vm:MainVM}">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -75,7 +75,7 @@
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Left" Margin="5">
                         <TextBlock Text="Loops"
-                                   Style="{DynamicResource MaterialDesignOverlineTextBlock}">Loops</TextBlock>
+                                   Style="{DynamicResource MaterialDesignOverlineTextBlock}"/>
                         <TextBox 
                                  md:HintAssist.Hint="10" Width="50">
                             <Binding Path="Loops" UpdateSourceTrigger="PropertyChanged">
@@ -101,23 +101,60 @@
                             CornerRadius="10"
                             Grid.Row="1">
                         <ListBox HorizontalAlignment="Stretch" Margin="5"
-                                 Style="{DynamicResource MaterialDesignCardsListBox}"
+                                 Style="{DynamicResource MaterialDesignChoiceChipListBox}"
                                  md:ScrollBarAssist.ButtonsVisibility="Visible"
                                  SelectedItem="{Binding SelectedDetect}"
                                  ItemsSource="{Binding Detects}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate DataType="{x:Type mm:AdDetect}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Type}"/>
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="32"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Margin="3"
+                                                Command="{Binding DataContext.EditDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                Style="{DynamicResource MaterialDesignIconButton}">
+                                            <TextBlock Text="E" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Button>
+                                        <TextBlock Text="{Binding DisplayType}" 
+                                                   Grid.Column="1" 
+                                                   VerticalAlignment="Center"
+                                                   Margin="3"/>
+                                        <TextBlock Text="(" 
+                                                   Grid.Column="2" 
+                                                   VerticalAlignment="Center"
+                                                   Margin="3 3 0 3"/>
+                                        <TextBlock Text="{Binding DisplayValue}" 
+                                                   Grid.Column="3" 
+                                                   VerticalAlignment="Center"
+                                                   Margin="3"/>
+                                        <TextBlock Text=")" 
+                                                   Grid.Column="4" 
+                                                   VerticalAlignment="Center"
+                                                   Margin="0 3 3 3"/>
+                                        <Button Grid.Column="5"
+                                                Command="{Binding DataContext.RemoveDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                Margin="3"
+                                                Style="{DynamicResource MaterialDesignIconButton}">
+                                            <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </Border>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
-                        <Button Margin="2" Cursor="Hand" Command="{Binding RemoveDetectCommand}">
-                            <TextBlock>Remove</TextBlock>
-                        </Button>
                         <Button Margin="2" Cursor="Hand" Command="{Binding AddDetectCommand}">
                             <TextBlock>Add</TextBlock>
                         </Button>

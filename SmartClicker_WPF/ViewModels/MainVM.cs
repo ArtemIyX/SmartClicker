@@ -26,11 +26,12 @@ namespace SmartClicker_WPF.ViewModels
             _settingsService = SettingsService;
             _fooManager = FooManager;
             _settingsJson = _settingsService.GetSettingsObject();
-            _drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
-            _selectedDriver = Drivers[0];
-            _timeOut = 60;
-            _loops = 5;
-            _siteUrl = @"101gardentools.com";
+            Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
+            Detects = new ObservableCollection<AdDetect>();
+            SelectedDriver = Drivers[0];
+            TimeOut = 60;
+            Loops = 5;
+            SiteUrl = @"101gardentools.com";
         }
 
         [ObservableProperty]
@@ -54,31 +55,62 @@ namespace SmartClicker_WPF.ViewModels
         [ObservableProperty]
         private AdDetect _selectedDetect;
 
-        [RelayCommand(CanExecute = nameof(CanRemoveDetect))]
-        public void RemoveDetect()
+        [RelayCommand]
+        public void RemoveDetect(object sender)
         {
-            if(SelectedDetect != null)
-            {
-                Detects.Remove(SelectedDetect);
-            }
+            if (Detects.Count <= 0)
+                throw new Exception("No list box items (Ad detects)");
+
+            AdDetect? selected = sender as AdDetect;
+            if (selected == null)
+                throw new Exception("Command sender is not AdDetect");
+
+            Detects.Remove(selected);
+
         }
-        public bool CanRemoveDetect => SelectedDetect != null && Detects.Count > 0;
+        [RelayCommand]
+        public void EditDetect(object sender)
+        {
+            AdDetect? adDetect = sender as AdDetect;
+            if (adDetect == null)
+                throw new Exception("Command sender is not AdDetect");
+
+            NewDetectWindow? window = _fooManager.ServiceProvider.GetService(typeof(NewDetectWindow)) as NewDetectWindow;
+            if (window == null)
+                throw new Exception("Can not get service (NewDetectWindow)");
+
+            window.ViewModel.SetValues(adDetect.Values ?? new List<DetectValue>());
+            window.ViewModel.SelectedDetectTypeIndex = (int)adDetect.Type;
+
+            int index = Detects.IndexOf(adDetect);
+            
+
+            window.ShowDialog();
+
+            adDetect.Values = window.ViewModel.GetValues();
+            adDetect.Type = (AdDetectType)window.ViewModel.SelectedDetectTypeIndex;
+
+            Detects.RemoveAt(index);
+            Detects.Insert(index, adDetect);
+        }
 
         [RelayCommand]
         public void AddDetect()
         {
             NewDetectWindow? window = _fooManager.ServiceProvider.GetService(typeof(NewDetectWindow)) as NewDetectWindow;
-            if(window == null) return;
+            if (window == null)
+                throw new Exception("Can not get service (NewDetectWindow)");
 
             window.ShowDialog();
             List<DetectValue> values = window.ViewModel.GetValues();
-            foreach(var v in values)
-            {
-                MessageBox.Show(v.Header);
-            }
+            AdDetectType type = (AdDetectType)window.ViewModel.SelectedDetectTypeIndex;
 
-            window.Close();
-            window = null;
+            AdDetect adDetect = new AdDetect()
+            {
+                Type = type,
+                Values = values
+            };
+            Detects.Add(adDetect);
         }
     }
 }

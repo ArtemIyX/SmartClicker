@@ -10,6 +10,7 @@ namespace SmartClicker_WPF.Models
     {
         Element,
         Tag,
+        Attribute,
         Class,
         Url
     }
@@ -17,6 +18,21 @@ namespace SmartClicker_WPF.Models
     public class AdDetect
     {
         public AdDetectType Type { get; set; }
-        public List<string>? Values { get; set; }
+        public List<DetectValue>? Values { get; set; }
+
+        public string DisplayValue
+        {
+            get
+            {
+                if (Values == null)
+                    return "none";
+                if (Values.Count == 0)
+                    return "";
+                if (Values.Count == 1)
+                    return Values[0].Header;
+                return Values[0].Header + "...";
+            }
+        }
+        public string DisplayType => Type.ToString();
     }
 }

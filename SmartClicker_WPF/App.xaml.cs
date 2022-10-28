@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using OpenQA.Selenium.DevTools.V104.Database;
 using SmartClicker_WPF.Services;
 using SmartClicker_WPF.ViewModels;
 using SmartClicker_WPF.Views;
@@ -41,6 +42,7 @@ namespace SmartClicker_WPF
             services.AddSingleton<MainWindow>();
             services.AddTransient<SettingsService>();
             services.AddTransient<InputService>();
+            services.AddTransient<AdDetectService>();
             services.AddTransient<MainVM>();
             services.AddTransient<NewDetectVM>();
             services.AddTransient<NewDetectWindow>();

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SmartClicker_WPF.Models;
+using SmartClicker_WPF.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,19 +16,22 @@ namespace SmartClicker_WPF.ViewModels
     [ObservableObject]
     public partial class NewDetectVM
     {
-        public NewDetectVM()
+        private AdDetectService _adDetectService;
+        public NewDetectVM(AdDetectService AdDetectService)
         {
-            DetectTypes = new ObservableCollection<string>(GetInitTypes());
+            _adDetectService = AdDetectService;
+            DetectTypes = new ObservableCollection<string>(_adDetectService.GetStringAddDetectTypes());
             Values = new ObservableCollection<DetectValue>();
             SelectedDetectTypeIndex = 0;
             NewValue = String.Empty;
         }
 
-        //TODO: In service
-        private IEnumerable<string> GetInitTypes()
+        public void SetValues(List<DetectValue> InValues)
         {
-            return Enum.GetValues<AdDetectType>().Select(x => x.ToString());
+            Values = new ObservableCollection<DetectValue>(InValues);
         }
+
+        public List<DetectValue> GetValues() => Values.ToList();
 
         [ObservableProperty]
         private ObservableCollection<string> _detectTypes;
@@ -38,13 +42,6 @@ namespace SmartClicker_WPF.ViewModels
         private ObservableCollection<DetectValue> _values;
         [ObservableProperty]
         private int _selectedValueIndex;
-
-        public void SetValues(List<DetectValue> InValues)
-        {
-            Values = new ObservableCollection<DetectValue>(InValues);
-        }
-
-        public List<DetectValue> GetValues() => Values.ToList();
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(AddNewValueCommand))]
