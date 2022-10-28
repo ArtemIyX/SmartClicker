@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using SmartClicker_WPF.Services;
 using SmartClicker_WPF.ViewModels;
 using SmartClicker_WPF.Views;
@@ -29,8 +30,6 @@ namespace SmartClicker_WPF
 
         private void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            /* string errorMessage = string.Format("An unhandled exception occurred: {0}", e.Exception.Message);
-             MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);*/
             var errorBox = new ErrorBox("Error", e.Exception.Message);
             errorBox.ShowDialog();
             e.Handled = true;
@@ -40,11 +39,11 @@ namespace SmartClicker_WPF
         {
             services.AddSingleton<FooManager>();
             services.AddSingleton<MainWindow>();
-            services.AddScoped<SettingsService>();
-            services.AddScoped<InputService>();
-            services.AddScoped<MainVM>();
-            services.AddScoped<NewDetectVM>();
-            services.AddScoped<NewDetectWindow>();
+            services.AddTransient<SettingsService>();
+            services.AddTransient<InputService>();
+            services.AddTransient<MainVM>();
+            services.AddTransient<NewDetectVM>();
+            services.AddTransient<NewDetectWindow>();
         }
 
         private void OnStartup(object sender, StartupEventArgs e)

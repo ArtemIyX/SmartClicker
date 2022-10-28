@@ -20,7 +20,7 @@ namespace SmartClicker_WPF.Views
     /// </summary>
     public partial class NewDetectWindow : Window
     {
-        private NewDetectVM ViewModel => (NewDetectVM)DataContext;
+        public NewDetectVM ViewModel => (NewDetectVM)DataContext;
         public NewDetectWindow(NewDetectVM VM)
         {
             this.DataContext = VM;

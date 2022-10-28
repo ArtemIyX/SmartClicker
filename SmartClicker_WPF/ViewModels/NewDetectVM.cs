@@ -39,6 +39,13 @@ namespace SmartClicker_WPF.ViewModels
         [ObservableProperty]
         private int _selectedValueIndex;
 
+        public void SetValues(List<DetectValue> InValues)
+        {
+            Values = new ObservableCollection<DetectValue>(InValues);
+        }
+
+        public List<DetectValue> GetValues() => Values.ToList();
+
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(AddNewValueCommand))]
         private string _newValue;

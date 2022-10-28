@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SmartClicker_WPF.ViewModels
 {
@@ -67,7 +68,17 @@ namespace SmartClicker_WPF.ViewModels
         public void AddDetect()
         {
             NewDetectWindow? window = _fooManager.ServiceProvider.GetService(typeof(NewDetectWindow)) as NewDetectWindow;
-            window?.ShowDialog();
+            if(window == null) return;
+
+            window.ShowDialog();
+            List<DetectValue> values = window.ViewModel.GetValues();
+            foreach(var v in values)
+            {
+                MessageBox.Show(v.Header);
+            }
+
+            window.Close();
+            window = null;
         }
     }
 }

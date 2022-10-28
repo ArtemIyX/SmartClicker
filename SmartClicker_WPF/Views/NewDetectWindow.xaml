@@ -45,16 +45,24 @@
                          SelectedIndex="{Binding SelectedValueIndex}">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type mm:DetectValue}">
-                            <StackPanel Orientation="Horizontal">
-                                <Button Command="{Binding DataContext.RemoveValueCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button     Grid.Column="0"
+                                            Command="{Binding DataContext.RemoveValueCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}"
                                             VerticalAlignment="Center" 
                                             Margin="2" Width="16" Height="16" 
                                             Style="{DynamicResource MaterialDesignIconButton}">
                                     <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Button>
-                                <TextBlock Text="{Binding Header}" Margin="2" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                <TextBox Grid.Column="1" 
+                                         Style="{DynamicResource MaterialDesignFilledTextBox}" 
+                                         Text="{Binding Header}" 
+                                         Margin="2" VerticalAlignment="Center"/>
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
 
