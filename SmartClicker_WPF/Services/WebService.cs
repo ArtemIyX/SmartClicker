@@ -67,9 +67,9 @@ namespace SmartClicker_WPF.Services
             return res;
         }
 
-        public WebDriver CreateWebDriver(string path, WebDriverType webManagerType)
+        public WebDriver CreateWebDriver(string path, WebDriverType webDriverType)
         {
-            switch (webManagerType)
+            switch (webDriverType)
             {
                 case WebDriverType.Chrome:
                     return CreateChromeDriver(path);
@@ -78,9 +78,9 @@ namespace SmartClicker_WPF.Services
             }
             return new ChromeDriver();
         }
-        public WebDriver CreateWebDriverWithProxy(string path, WebDriverType webManagerType, WebProxyType webProxyType, string ip)
+        public WebDriver CreateWebDriverWithProxy(string path, WebDriverType webDriverType, WebProxyType webProxyType, string ip)
         {
-            switch (webManagerType)
+            switch (webDriverType)
             {
                 case WebDriverType.Chrome:
                     return CreateChromeDriverWithProxy(path, webProxyType, ip);
@@ -89,12 +89,12 @@ namespace SmartClicker_WPF.Services
             }
             return new ChromeDriver();
         }
-        public WebDriver CreateWebDriverWithPrivateProxy(string path, WebDriverType webManagerType,
+        public WebDriver CreateWebDriverWithPrivateProxy(string path, WebDriverType webDriverType,
             WebProxyType webProxyType, string ip,
             string username,
             string password)
         {
-            switch (webManagerType)
+            switch (webDriverType)
             {
                 case WebDriverType.Chrome:
                     return CreateChromeDriverWithPrivateProxy(path, webProxyType, ip, username, password);

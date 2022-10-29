@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Media;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -32,6 +33,7 @@ namespace SmartClicker_WPF
         private void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             var errorBox = new ErrorBox("Error", e.Exception.Message);
+            SystemSounds.Hand.Play();
             errorBox.ShowDialog();
             e.Handled = true;
         }

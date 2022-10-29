@@ -39,7 +39,7 @@ namespace SmartClicker_WPF.Services
             _webService = webService;
             _webDriverType = webDriverType;
             _driverPath = driverPath;
-            timeOut = timeOut;
+            _timeOut = timeOut;
             _loops = loops;
             _proxies = proxies;
             _proxyType = proxyType;
@@ -48,23 +48,38 @@ namespace SmartClicker_WPF.Services
             _useProxy = true;
         }
 
-        public void InitDriver()
+        public void InitDriver(int index = 0)
         {
-            if (_driver != null)
-                return;
             if (_useProxy)
             {
-
+                if(!string.IsNullOrEmpty(_username) &&
+                    !string.IsNullOrEmpty(_password))
+                {
+                    _driver = _webService.CreateWebDriverWithPrivateProxy(_driverPath, 
+                        _webDriverType, 
+                        _proxyType, 
+                        _proxies.ElementAt(index), 
+                        _username, 
+                        _password);
+                }
+                else
+                {
+                    _driver = _webService.CreateWebDriverWithProxy(_driverPath,
+                        _webDriverType,
+                        _proxyType,
+                        _proxies.ElementAt(index));
+                }
             }
             else
             {
-
+                _driver = _webService.CreateWebDriver(_driverPath, _webDriverType);
             }
         }
 
         public async Task Start()
         {
-
+            InitDriver(0);
+            _driver.Navigate().GoToUrl("http://azenv.net/");
         }
     }
 }

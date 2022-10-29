@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +23,10 @@ namespace SmartClicker_WPF.ViewModels
         private SettingsJson _settingsJson;
         private FooManager _fooManager;
         private ProxyService _proxyService;
-        public MainVM(SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
+        private WebService _webService;
+        public MainVM(WebService WebService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
         {
+            _webService = WebService;
             _settingsService = SettingsService;
             _fooManager = FooManager;
             _proxyService = ProxyService;
@@ -146,16 +149,39 @@ namespace SmartClicker_WPF.ViewModels
             DriverSettingsWindow? window = _fooManager.ServiceProvider.GetService(typeof(DriverSettingsWindow)) as DriverSettingsWindow;
             if (window == null)
                 throw new Exception("Can not get service (DriverSettingsWindow)");
+            int selected = Drivers.IndexOf(SelectedDriver);
+
             window.ViewModel.InsertSettings(_settingsJson);
             window.ShowDialog();
             window.ViewModel.ModifySettings(_settingsJson);
             await _settingsService.SaveSettingsObjectAsync(_settingsJson);
+
+            Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
+            SelectedDriver = Drivers[selected];
         }
 
         [RelayCommand]
-        public async Task Start()
+        public void Start()
         {
-
+            throw new Exception(GetDriverPath());
+            
+        }
+        private string GetDriverPath()
+        {
+            string fullPath = _selectedDriver.Path;
+            if (Directory.Exists(fullPath))
+            {
+                return fullPath;
+            }
+            if (File.Exists(fullPath))
+            {
+                string newPath = Path.GetFullPath(Path.Combine(fullPath, @"..\"));
+                if (Directory.Exists(newPath))
+                {
+                    return newPath;
+                }
+            }
+            throw new Exception("Invalid path for web driver");
         }
     }
 }
