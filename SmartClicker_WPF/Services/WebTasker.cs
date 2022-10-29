@@ -22,6 +22,8 @@ namespace SmartClicker_WPF.Services
         private readonly string _driverPath;
         private readonly int _timeOut;
 
+        public event Action OnFinished;
+
         public WebTasker(WebService webService, string driverPath, int timeOut, WebDriverType webDriverType, int loops)
         {
             _webService = webService;
@@ -80,6 +82,9 @@ namespace SmartClicker_WPF.Services
         {
             InitDriver(0);
             _driver.Navigate().GoToUrl("http://azenv.net/");
+            await Task.Delay(5000);
+            _driver.Quit();
+            OnFinished.Invoke();
         }
     }
 }

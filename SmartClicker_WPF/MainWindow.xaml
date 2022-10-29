@@ -245,7 +245,8 @@
                         HorizontalAlignment="Right" 
                         Margin="2" 
                         Cursor="Hand"
-                        Command="{Binding StartCommand}">
+                        Command="{Binding StartCommand}"
+                        IsEnabled="{Binding IsStartButtonEnabled}">
                     <TextBlock Text="Start"/>
                 </Button>
             </Grid>

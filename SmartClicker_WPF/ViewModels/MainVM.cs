@@ -39,7 +39,13 @@ namespace SmartClicker_WPF.ViewModels
             TimeOut = 60;
             Loops = 5;
             SiteUrl = @"101gardentools.com";
+            InProgress = false;
         }
+
+        public bool IsStartButtonEnabled => !InProgress;
+
+        [ObservableProperty]
+        private bool _inProgress;
 
         [ObservableProperty]
         private bool _useProxy;
@@ -161,11 +167,22 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public void Start()
+        public async Task Start()
         {
-            throw new Exception(GetDriverPath());
-            
+            WebTasker tasker = new WebTasker(_webService, GetDriverPath(), _timeOut, (WebDriverType)(Drivers.IndexOf(SelectedDriver)), _loops);
+            InProgress = true;
+            tasker.OnFinished += Tasker_OnFinished;
+            await tasker.Start();
+
+
         }
+
+        private void Tasker_OnFinished()
+        {
+            InProgress = false;
+            throw new NotImplementedException("Hello blyad");
+        }
+
         private string GetDriverPath()
         {
             string fullPath = _selectedDriver.Path;
