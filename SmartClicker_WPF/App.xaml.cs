@@ -42,6 +42,7 @@ namespace SmartClicker_WPF
             services.AddSingleton<MainWindow>();
             services.AddTransient<SettingsService>();
             services.AddTransient<InputService>();
+            services.AddTransient<ProxyService>();
             services.AddTransient<AdDetectService>();
             services.AddTransient<MainVM>();
             services.AddTransient<NewDetectVM>();

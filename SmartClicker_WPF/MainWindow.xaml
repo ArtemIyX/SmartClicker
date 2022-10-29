@@ -23,6 +23,7 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance Type=vm:MainVM}">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -97,7 +98,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="45"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}" Text="Ad detection"/> 
+                    <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}" Text="Ad detection"/>
                     <Border Background="{DynamicResource MaterialDesignChipBackground}" 
                             CornerRadius="10"
                             Grid.Row="1">
@@ -178,7 +179,7 @@
                         <RowDefinition Height="40"/>
                         <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
-                    <CheckBox Content="Use proxy"/>
+                    <CheckBox Content="Use proxy" IsChecked="{Binding UseProxy}"/>
                     <TextBlock Text="Proxy list" 
                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                Grid.Row="1"
@@ -186,21 +187,20 @@
                     <Border Grid.Row="2" 
                             Margin="2"
                             Background="{DynamicResource MaterialDesignChipBackground}">
-                        <RichTextBox md:HintAssist.Hint="  127.0.0.1">
-                            <RichTextBox.Resources>
-                                <Style TargetType="{x:Type Paragraph}">
-                                    <Setter Property="Margin" Value="0"/>
-                                </Style>
-                            </RichTextBox.Resources>
-                        </RichTextBox>
+                        <TextBox md:HintAssist.Hint="127.0.0.1"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Visible" Margin="2"
+                                 Text="{Binding ProxyList}"/>
                     </Border>
-                    <StackPanel Grid.Row="3" Margin="2">
+                    <StackPanel Grid.Row="3">
                         <TextBlock VerticalAlignment="Center" 
                                    HorizontalAlignment="Left" 
-                                   Text="Proxy type" Margin="2"/>
+                                   Text="Proxy type" />
                         <ComboBox SelectedIndex="0" 
                                   HorizontalAlignment="Left" 
-                                  Width="150">
+                                  Width="150"
+                                  ItemsSource="{Binding ProxyTypes}">
                         </ComboBox>
                     </StackPanel>
                     <TextBox md:HintAssist.Hint="Username" 
@@ -208,16 +208,18 @@
                              Grid.Row="4" 
                              HorizontalAlignment="Left"
                              Width="150"
-                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"/>
+                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                             Text="{Binding ProxyUserName}"/>
                     <TextBox md:HintAssist.Hint="Password" 
                              VerticalAlignment="Center"
                              Grid.Row="5" 
                              HorizontalAlignment="Left"
                              Width="150"
-                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"/>
+                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                             Text="{Binding ProxyPassword}"/>
                 </Grid>
             </GroupBox>
         </Grid>
-        
+
     </Grid>
 </Window>

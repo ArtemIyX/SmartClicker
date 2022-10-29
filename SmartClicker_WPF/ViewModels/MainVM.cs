@@ -21,18 +21,40 @@ namespace SmartClicker_WPF.ViewModels
         private SettingsService _settingsService;
         private SettingsJson _settingsJson;
         private FooManager _fooManager;
-        public MainVM(SettingsService SettingsService, FooManager FooManager)
+        private ProxyService _proxyService;
+        public MainVM(SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
         {
             _settingsService = SettingsService;
             _fooManager = FooManager;
+            _proxyService = ProxyService;
             _settingsJson = _settingsService.GetSettingsObject();
             Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
             Detects = new ObservableCollection<AdDetect>();
+            ProxyTypes = new ObservableCollection<string>(_proxyService.GetProxyTypesString());
+            SelectedProxyTypeIndex = 0;
             SelectedDriver = Drivers[0];
             TimeOut = 60;
             Loops = 5;
             SiteUrl = @"101gardentools.com";
         }
+
+        [ObservableProperty]
+        private bool _useProxy;
+
+        [ObservableProperty]
+        private string _proxyList;
+
+        [ObservableProperty]
+        private ObservableCollection<string> _proxyTypes;
+
+        [ObservableProperty]
+        private int _selectedProxyTypeIndex;
+
+        [ObservableProperty]
+        private string _proxyUserName;
+
+        [ObservableProperty]
+        private string _proxyPassword;
 
         [ObservableProperty]
         private int _timeOut;
@@ -69,6 +91,7 @@ namespace SmartClicker_WPF.ViewModels
 
 
         }
+
         [RelayCommand]
         public void EditDetect(object sender)
         {
