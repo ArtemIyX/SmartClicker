@@ -67,6 +67,7 @@ namespace SmartClicker_WPF.ViewModels
 
             Detects.Remove(selected);
 
+
         }
         [RelayCommand]
         public void EditDetect(object sender)
