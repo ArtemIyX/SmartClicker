@@ -23,203 +23,213 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance Type=vm:MainVM}">
-
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Exit" Click="MenuItem_Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Settings">
+                <MenuItem Header="Driver settings" Command="{Binding OpenDriverSettingsCommand}"/>
+            </MenuItem>
+        </Menu>
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="250"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <GroupBox Header="Main" Margin="5">
-                <StackPanel>
-                    <StackPanel HorizontalAlignment="Left" Margin="5">
-                        <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Driver</TextBlock>
-                        <ComboBox Name="comboBox_Driver" MinWidth="150"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="250"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <GroupBox Header="Main" Margin="5">
+                    <StackPanel>
+                        <StackPanel HorizontalAlignment="Left" Margin="5">
+                            <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Driver</TextBlock>
+                            <ComboBox Name="comboBox_Driver" MinWidth="150"
                                   ItemsSource="{Binding Drivers}"
                                   SelectedItem="{Binding SelectedDriver}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type mm:Driver}">
-                                    <TextBlock Text="{Binding Title}"></TextBlock>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel HorizontalAlignment="Left" Margin="5">
-                        <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Site url</TextBlock>
-                        <TextBox Name="textBox_SiteUrl"  
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type mm:Driver}">
+                                        <TextBlock Text="{Binding Title}"></TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Left" Margin="5">
+                            <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}">Site url</TextBlock>
+                            <TextBox Name="textBox_SiteUrl"  
                                  md:HintAssist.Hint="Enter site url" MinWidth="150">
-                            <Binding Path="SiteUrl" UpdateSourceTrigger="PropertyChanged">
-                                <Binding.ValidationRules>
-                                    <valids:NotNulTextValidation/>
-                                </Binding.ValidationRules>
-                            </Binding>
-                        </TextBox>
-                    </StackPanel>
-                    <StackPanel HorizontalAlignment="Left" Margin="5">
-                        <TextBlock 
+                                <Binding Path="SiteUrl" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <valids:NotNulTextValidation/>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Left" Margin="5">
+                            <TextBlock 
                                    Style="{DynamicResource MaterialDesignOverlineTextBlock}">Timeout</TextBlock>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox md:HintAssist.Hint="300" Width="50">
-                                <Binding Path="TimeOut" UpdateSourceTrigger="PropertyChanged">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox md:HintAssist.Hint="300" Width="50">
+                                    <Binding Path="TimeOut" UpdateSourceTrigger="PropertyChanged">
+                                        <Binding.ValidationRules>
+                                            <valids:NumericTextBoxValidation/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox>
+                                <TextBlock Text="Sec" Style="{DynamicResource MaterialDesignCharacterCounterTextBlock}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Left" Margin="5">
+                            <TextBlock Text="Loops"
+                                   Style="{DynamicResource MaterialDesignOverlineTextBlock}"/>
+                            <TextBox 
+                                 md:HintAssist.Hint="10" Width="50">
+                                <Binding Path="Loops" UpdateSourceTrigger="PropertyChanged">
                                     <Binding.ValidationRules>
                                         <valids:NumericTextBoxValidation/>
                                     </Binding.ValidationRules>
                                 </Binding>
                             </TextBox>
-                            <TextBlock Text="Sec" Style="{DynamicResource MaterialDesignCharacterCounterTextBlock}"/>
                         </StackPanel>
-                    </StackPanel>
-                    <StackPanel HorizontalAlignment="Left" Margin="5">
-                        <TextBlock Text="Loops"
-                                   Style="{DynamicResource MaterialDesignOverlineTextBlock}"/>
-                        <TextBox 
-                                 md:HintAssist.Hint="10" Width="50">
-                            <Binding Path="Loops" UpdateSourceTrigger="PropertyChanged">
-                                <Binding.ValidationRules>
-                                    <valids:NumericTextBoxValidation/>
-                                </Binding.ValidationRules>
-                            </Binding>
-                        </TextBox>
-                    </StackPanel>
 
-                </StackPanel>
-            </GroupBox>
+                    </StackPanel>
+                </GroupBox>
 
-            <GroupBox Header="Detect" Margin="5" VerticalAlignment="Stretch" Grid.Row="1">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="45"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}" Text="Ad detection"/>
-                    <Border Background="{DynamicResource MaterialDesignChipBackground}" 
+                <GroupBox Header="Detect" Margin="5" VerticalAlignment="Stretch" Grid.Row="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="45"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}" Text="Ad detection"/>
+                        <Border Background="{DynamicResource MaterialDesignChipBackground}" 
                             CornerRadius="10"
                             Grid.Row="1">
-                        <ListBox HorizontalAlignment="Stretch" Margin="5"
+                            <ListBox HorizontalAlignment="Stretch" Margin="5"
                                  Style="{DynamicResource MaterialDesignChoiceChipListBox}"
                                  md:ScrollBarAssist.ButtonsVisibility="Visible"
                                  SelectedItem="{Binding SelectedDetect}"
                                  ItemsSource="{Binding Detects}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type mm:AdDetect}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="32"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="10"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="10"/>
-                                            <ColumnDefinition Width="32"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" Margin="3"
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type mm:AdDetect}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="32"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="32"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Margin="3"
                                                 Command="{Binding DataContext.EditDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                 CommandParameter="{Binding}"
                                                 VerticalAlignment="Center"
                                                 HorizontalAlignment="Center"
                                                 Style="{DynamicResource MaterialDesignIconButton}">
-                                            <TextBlock Text="E" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Button>
-                                        <TextBlock Text="{Binding DisplayType}" 
+                                                <TextBlock Text="E" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Button>
+                                            <TextBlock Text="{Binding DisplayType}" 
                                                    Grid.Column="1" 
                                                    VerticalAlignment="Center"
                                                    Margin="3"/>
-                                        <TextBlock Text="(" 
+                                            <TextBlock Text="(" 
                                                    Grid.Column="2" 
                                                    VerticalAlignment="Center"
                                                    Margin="3 3 0 3"/>
-                                        <TextBlock Text="{Binding DisplayValue}" 
+                                            <TextBlock Text="{Binding DisplayValue}" 
                                                    Grid.Column="3" 
                                                    VerticalAlignment="Center"
                                                    Margin="3"/>
-                                        <TextBlock Text=")" 
+                                            <TextBlock Text=")" 
                                                    Grid.Column="4" 
                                                    VerticalAlignment="Center"
                                                    Margin="0 3 3 3"/>
-                                        <Button Grid.Column="5"
+                                            <Button Grid.Column="5"
                                                 Command="{Binding DataContext.RemoveDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                 CommandParameter="{Binding}"
                                                 VerticalAlignment="Center"
                                                 HorizontalAlignment="Center"
                                                 Margin="3"
                                                 Style="{DynamicResource MaterialDesignIconButton}">
-                                            <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Button>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Border>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
-                        <Button Margin="2" Cursor="Hand" Command="{Binding AddDetectCommand}">
-                            <TextBlock>Add</TextBlock>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
+                                                <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+                            <Button Margin="2" Cursor="Hand" Command="{Binding AddDetectCommand}">
+                                <TextBlock>Add</TextBlock>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
 
-        </Grid>
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <GroupBox Header="Proxy" Margin="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="45"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                    </Grid.RowDefinitions>
-                    <CheckBox Content="Use proxy" IsChecked="{Binding UseProxy}"/>
-                    <TextBlock Text="Proxy list" 
+            </Grid>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <GroupBox Header="Proxy" Margin="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="45"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <CheckBox Content="Use proxy" IsChecked="{Binding UseProxy}"/>
+                        <TextBlock Text="Proxy list" 
                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                Grid.Row="1"
                                VerticalAlignment="Bottom"/>
-                    <Border Grid.Row="2" 
+                        <Border Grid.Row="2" 
                             Margin="2"
                             Background="{DynamicResource MaterialDesignChipBackground}">
-                        <TextBox md:HintAssist.Hint="127.0.0.1"
+                            <TextBox md:HintAssist.Hint="127.0.0.1"
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Visible" Margin="2"
                                  Text="{Binding ProxyList}"/>
-                    </Border>
-                    <StackPanel Grid.Row="3">
-                        <TextBlock VerticalAlignment="Center" 
+                        </Border>
+                        <StackPanel Grid.Row="3">
+                            <TextBlock VerticalAlignment="Center" 
                                    HorizontalAlignment="Left" 
                                    Text="Proxy type" />
-                        <ComboBox SelectedIndex="0" 
+                            <ComboBox SelectedIndex="0" 
                                   HorizontalAlignment="Left" 
                                   Width="150"
                                   ItemsSource="{Binding ProxyTypes}">
-                        </ComboBox>
-                    </StackPanel>
-                    <TextBox md:HintAssist.Hint="Username" 
+                            </ComboBox>
+                        </StackPanel>
+                        <TextBox md:HintAssist.Hint="Username" 
                              VerticalAlignment="Center"
                              Grid.Row="4" 
                              HorizontalAlignment="Left"
                              Width="150"
                              Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
                              Text="{Binding ProxyUserName}"/>
-                    <TextBox md:HintAssist.Hint="Password" 
+                        <TextBox md:HintAssist.Hint="Password" 
                              VerticalAlignment="Center"
                              Grid.Row="5" 
                              HorizontalAlignment="Left"
                              Width="150"
                              Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
                              Text="{Binding ProxyPassword}"/>
-                </Grid>
-            </GroupBox>
-        </Grid>
+                    </Grid>
+                </GroupBox>
+            </Grid>
 
-    </Grid>
+        </Grid>
+    </DockPanel>
+    
 </Window>

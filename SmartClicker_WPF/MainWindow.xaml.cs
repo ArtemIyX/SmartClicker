@@ -33,5 +33,10 @@ namespace SmartClicker_WPF
             this.DataContext = mainVM;
             InitializeComponent();
         }
+
+        private void MenuItem_Exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

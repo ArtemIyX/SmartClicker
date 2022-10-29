@@ -136,5 +136,17 @@ namespace SmartClicker_WPF.ViewModels
             };
             Detects.Add(adDetect);
         }
+
+        [RelayCommand]
+        public async Task OpenDriverSettings()
+        {
+            DriverSettingsWindow? window = _fooManager.ServiceProvider.GetService(typeof(DriverSettingsWindow)) as DriverSettingsWindow;
+            if (window == null)
+                throw new Exception("Can not get service (DriverSettingsWindow)");
+            window.ViewModel.InsertSettings(_settingsJson);
+            window.ShowDialog();
+            window.ViewModel.ModifySettings(_settingsJson);
+            await _settingsService.SaveSettingsObjectAsync(_settingsJson);
+        }
     }
 }

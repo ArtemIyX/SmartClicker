@@ -13,7 +13,7 @@ namespace SmartClicker_WPF.Services
     {
         public static string SavePath = "settings.json";
 
-        private SettingsJson LoadDefaultSettingsObject()
+        public SettingsJson LoadDefaultSettingsObject()
             => new SettingsJson()
             {
                 EdgeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "edgedriver_win64",

@@ -1,0 +1,87 @@
+﻿<Window x:Class="SmartClicker_WPF.Views.DriverSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SmartClicker_WPF.Views"
+        xmlns:vm="clr-namespace:SmartClicker_WPF.ViewModels"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:i = "http://schemas.microsoft.com/expression/2010/interactivity" 
+        xmlns:mm="clr-namespace:SmartClicker_WPF.Models"
+        mc:Ignorable="d"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        ResizeMode="CanResize"
+        d:DataContext="{d:DesignInstance Type=vm:DriverSettingsVM}"
+        Title="Driver settings" 
+        Height="350" Width="450"
+        MinHeight="350" MinWidth="450">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="45"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Chrome driver path" VerticalAlignment="Bottom" Style="{DynamicResource MaterialDesignCaptionTextBlock}"/>
+        <Grid Grid.Row="1" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="65"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Margin="2" md:HintAssist.Hint="Chrome"
+                     Style="{DynamicResource MaterialDesignFilledTextBox}"
+                     Text="{Binding ChromePath}"/>
+            <Button Margin="2" Grid.Column="1" Command="{Binding ChromeSelectCommand}">
+                <TextBlock Text="..."/>
+            </Button>
+        </Grid>
+        <TextBlock Grid.Row="2" Text="Firefox driver path" VerticalAlignment="Bottom" Style="{DynamicResource MaterialDesignCaptionTextBlock}"/>
+        <Grid Grid.Row="3" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="65"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Margin="2" md:HintAssist.Hint="Firefox" 
+                     Style="{DynamicResource MaterialDesignFilledTextBox}"
+                     Text="{Binding FirefoxPath}"/>
+            <Button Margin="2" Grid.Column="1" Command="{Binding FirefoxSelectCommand}">
+                <TextBlock Text="..."/>
+            </Button>
+        </Grid>
+        <TextBlock Grid.Row="4" Text="Edge driver path" VerticalAlignment="Bottom" Style="{DynamicResource MaterialDesignCaptionTextBlock}"/>
+        <Grid Grid.Row="5" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="65"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Margin="2" md:HintAssist.Hint="Edge" 
+                     Style="{DynamicResource MaterialDesignFilledTextBox}" 
+                     Text="{Binding EdgePath}"/>
+            <Button Margin="2" Grid.Column="1" Command="{Binding EdgeSelectCommand}" Cursor="Hand">
+                <TextBlock Text="..."/>
+            </Button>
+        </Grid>
+        <StackPanel Grid.Row="7" 
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Bottom"
+                    Margin="5">
+            <Button Margin="2" Command="{Binding ResetBtnCommand}">
+                <TextBlock Text="Reset"/>
+            </Button>
+            <Button Margin="2" Click="Ok_Click" Cursor="Hand">
+                <TextBlock Text="Ok"/>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
