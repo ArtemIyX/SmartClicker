@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.Models
 {
-
-    public class Driver
+    public class LogModel
     {
-        public string? Title { get; set; }
-        public string? Path { get; set; }
+        public string? Log { get; set; }
     }
 }

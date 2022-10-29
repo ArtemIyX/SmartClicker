@@ -77,6 +77,9 @@ namespace SmartClicker_WPF.ViewModels
         [ObservableProperty]
         private AdDetect _selectedDetect;
 
+        [ObservableProperty]
+        private ObservableCollection<LogModel> _logs;
+
         [RelayCommand]
         public void RemoveDetect(object sender)
         {
@@ -147,6 +150,12 @@ namespace SmartClicker_WPF.ViewModels
             window.ShowDialog();
             window.ViewModel.ModifySettings(_settingsJson);
             await _settingsService.SaveSettingsObjectAsync(_settingsJson);
+        }
+
+        [RelayCommand]
+        public async Task Start()
+        {
+
         }
     }
 }

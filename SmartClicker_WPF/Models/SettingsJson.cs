@@ -7,6 +7,19 @@ using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.Models
 {
+    public enum WebProxyType
+    {
+        Http,
+        Https,
+        Socks4,
+        Socks5
+    }
+    public enum WebDriverType
+    {
+        /*Edge, Don't support http proxy with auth*/
+        Chrome,
+        Firefox
+    }
     public class SettingsJson
     {
         public string? ChromeDriverPath { get; set; }

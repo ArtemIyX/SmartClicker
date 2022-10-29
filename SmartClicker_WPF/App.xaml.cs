@@ -49,6 +49,7 @@ namespace SmartClicker_WPF
             services.AddTransient<NewDetectWindow>();
             services.AddTransient<DriverSettingsVM>();
             services.AddTransient<DriverSettingsWindow>();
+            services.AddTransient<WebService>();
         }
 
         private void OnStartup(object sender, StartupEventArgs e)

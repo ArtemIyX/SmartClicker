@@ -2,6 +2,8 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Internal;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,21 +16,12 @@ public class Program
     private static WebDriver webDriver { get; set; } = null!;
     private static string driverPath { get; set; }
     private static string baseUrl { get; set; }
-    public enum Test
-    {
-        my_enum,
-        test_b, 
-        good
-    }
     public static void Main(string[] args)
     {
-        /* driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";
-         baseUrl = @"https://www.google.com/";
-         webDriver = GetChromeDriver();
-         webDriver.Navigate().GoToUrl(baseUrl);
-         Thread.Sleep(5000);
-         var search_form = GetGoogleSearchMainInput();*/
-        Console.WriteLine(Test.good.ToString());
+        driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";
+        baseUrl = @"http://azenv.net/";
+        webDriver = GetChromeDriver();
+        webDriver.Navigate().GoToUrl(baseUrl);
     }
 
     public static IWebElement GetGoogleSearchMainInput()
@@ -41,7 +34,7 @@ public class Program
                 var attr = form.GetAttribute("role");
                 if (attr == "search")
                 {
-                   
+
                     Console.WriteLine("Found search form!");
                     return form;
                 }
@@ -55,13 +48,33 @@ public class Program
         return null;
     }
 
+    //public static Driver
+
+    public static EdgeDriver GetEdgeDriver()
+    {
+        var options = new EdgeOptions();
+        string ip = "219.78.228.211:80";
+        options.Proxy = new Proxy()
+        {
+            HttpProxy = ip,
+            //FtpProxy = ip,
+            SslProxy = ip,
+            Kind = ProxyKind.Manual
+        };
+        //options.AddArgument("--proxy-server=219.78.228.211:80");
+        options.AddArgument("ignore-certificate-errors");
+        var driver = new EdgeDriver(driverPath, options, TimeSpan.FromSeconds(60));
+        return driver;
+    }
+
     public static ChromeDriver GetChromeDriver()
     {
         var proxy = new Proxy();
-        proxy.SocksProxy = "2.139.162.80:4145";
-        proxy.SocksVersion = 4;
+        proxy.HttpProxy = "62.193.108.142:1981";
+        proxy.SslProxy = "62.193.108.142:1981";
         var options = new ChromeOptions();
         options.Proxy = proxy;
-        return new ChromeDriver(driverPath, options, TimeSpan.FromSeconds(60));
+        var driver = new ChromeDriver(driverPath, options, TimeSpan.FromSeconds(30));
+        return driver;
     }
 }
