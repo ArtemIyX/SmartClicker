@@ -176,19 +176,19 @@ namespace SmartClicker_WPF.ViewModels
             InProgress = true;
             tasker.OnFinished += Tasker_OnFinished;
             tasker.Start();
-            await Task.Delay(1000);
+            await Task.Delay(TimeOut);
             _cancelTokenSource.Cancel();
         }
 
-        private void Tasker_OnFinished()
+        private void Tasker_OnFinished(string reason)
         {
             InProgress = false;
-
+            throw new Exception($"Task finished, reason: {reason}");
         }
 
         private string GetDriverPath()
         {
-            string fullPath = _selectedDriver.Path;
+            string fullPath = _selectedDriver.Path ?? "";
             if (Directory.Exists(fullPath))
             {
                 return fullPath;

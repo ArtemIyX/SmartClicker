@@ -12,6 +12,8 @@ namespace SmartClicker_WPF.Services
 {
     public class WebTasker
     {
+        private static string GoogleURL = @"https://www.google.com/";
+
         private WebDriver? _driver;
         private readonly int _loops;
         private readonly ICollection<string> _proxies;
@@ -24,7 +26,10 @@ namespace SmartClicker_WPF.Services
         private readonly string _driverPath;
         private readonly int _timeOut;
         private CancellationToken _cancellationToken;
-        public event Action OnFinished;
+        private Task _backgroundCheckTask;
+        public event Action<string> OnFinished;
+
+        public int CancelCheckDelayMs { get; set; } = 500;
 
         public WebTasker(CancellationToken cancellationToken, WebService webService, string driverPath, int timeOut, WebDriverType webDriverType, int loops)
         {
@@ -81,45 +86,46 @@ namespace SmartClicker_WPF.Services
                 _driver = _webService.CreateWebDriver(_driverPath, _webDriverType);
             }
         }
-        private void FinishWork()
+        private void FinishWork(string reason)
         {
             if (_driver != null)
             {
                 _driver.Quit();
                 _driver = null;
-                OnFinished.Invoke();
+                OnFinished.Invoke(reason);
             }
         }
-        private void BackgroundChecking()
+        private void CheckCancel()
         {
             if (_cancellationToken.IsCancellationRequested)
             {
                 _cancellationToken.ThrowIfCancellationRequested();
             }
         }
+        private void BackgroundChecking()
+        {
+            while (true)
+            {
+                try
+                {
+                    CheckCancel();
+                    Task.Delay(CancelCheckDelayMs);
+                }
+                catch (Exception)
+                {
+                    FinishWork("Aborted");
+                    break;
+                }
+            }
+        }
 
         public void Start()
         {
-            Task t = Task.Run(() =>
-            {
-                while (true)
-                {
-                    try
-                    {
-                        BackgroundChecking();
-                        Task.Delay(500);
-                    }
-                    catch(Exception ex)
-                    {
-                        FinishWork();
-                        break;
-                    }
-                }
-            });
+            _backgroundCheckTask = Task.Run(() => { BackgroundChecking();});
             InitDriver(0);
             if (_driver == null)
                 throw new Exception("Driver has not been initialized");
-            _driver.Navigate().GoToUrl("http://azenv.net/");
+            _driver.Navigate().GoToUrl("");
         }
 
     }
