@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
+using SmartClicker_WPF.Extensions;
 using SmartClicker_WPF.Finders;
 using SmartClicker_WPF.Models;
 using System;
@@ -40,7 +41,6 @@ namespace SmartClicker_WPF.Services
         private Random _rand = new Random();
         private int randDelay() => _rand.Next(250, 750);
         private List<string> _keys = new List<string>();
-        private int _keysIndex = 0;
         private int _pageIndex = 1;
 
         public event Action<string> OnFinished;
@@ -118,7 +118,7 @@ namespace SmartClicker_WPF.Services
 
             _driver.Navigate().GoToUrl(GoogleURL);
             await AccepCookiesGoogle();
-            string selectedKey = _keys[_keysIndex];
+            string selectedKey = _keys.RandomElement();
             await TypeSearchingQeury(selectedKey);
             await PressSearchingButton();
             await GoOnWebSite();
@@ -139,6 +139,8 @@ namespace SmartClicker_WPF.Services
                 return (null, ex);
             }
         }
+
+        private void ClickOnBlankArea() => /*_driver.FindElement(By.XPath("//html")).Click();*/ new Actions(_driver).MoveByOffset(0, 0).Click().Build().Perform();
 
         // Try find site by search result
         private async Task GoOnWebSite()
@@ -181,7 +183,7 @@ namespace SmartClicker_WPF.Services
             OnLog.Invoke($"Waiting for page {_pageIndex}...");
 
             // Wait until page is loaded
-            (IWebElement? nav_table, Exception ex) = await WaitUntilElemenFoundSave(NavTableSearchTiemOutS, drv =>
+            (IWebElement? nav_table, Exception? ex) = await WaitUntilElemenFoundSave(NavTableSearchTiemOutS, drv =>
             {
                 return GoogleFinder.GetGooglePageTable(drv);
             });
@@ -269,8 +271,9 @@ namespace SmartClicker_WPF.Services
 
             OnLog.Invoke("Found google search input");
 
-            searchInput?.Clear();
-            searchInput?.SendKeys(query);
+            searchInput.Clear();
+            searchInput.SendKeys(query);
+            ClickOnBlankArea();
             await Task.Delay(randDelay());
         }
 
@@ -326,6 +329,7 @@ namespace SmartClicker_WPF.Services
         {
             if (_driver != null)
             {
+                _driver.Manage().Cookies.DeleteAllCookies();
                 _driver.Quit();
                 _driver = null;
                 OnFinished.Invoke(reason);

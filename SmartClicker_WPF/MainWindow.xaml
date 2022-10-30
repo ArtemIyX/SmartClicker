@@ -243,6 +243,7 @@
                             <TextBox md:HintAssist.Hint="Best Gardening"
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"
+                                 TextAlignment="Left"
                                  VerticalScrollBarVisibility="Visible" Margin="2"
                                  Text="{Binding KeyWords}"/>
                         </Border>

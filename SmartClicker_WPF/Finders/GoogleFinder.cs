@@ -13,7 +13,7 @@ namespace SmartClicker_WPF.Finders
     {
         public static IWebElement? GetAcceptCookieButton(IWebDriver driver)
         {
-            var elements = driver.FindElements(By.XPath("//*[@role='none']"));
+            ReadOnlyCollection<IWebElement> elements = driver.FindElements(By.XPath("//*[@role='none']"));
 
             IWebElement? divWithRole = null;
             if (elements.Count == 0)
@@ -39,6 +39,11 @@ namespace SmartClicker_WPF.Finders
                 }
             }
             return null;
+        }
+        public static IWebElement? GetMainGoogleSearchButton(IWebDriver driver)
+        {
+            //Search button have name 'btnK'
+            return driver.FindElements(By.Name("btnK")).Last();
         }
 
         public static IWebElement? GetGooglePageLink(IWebElement table, int page)
@@ -71,11 +76,6 @@ namespace SmartClicker_WPF.Finders
             return null;
         }
 
-        public static IWebElement? GetMainGoogleSearchButton(IWebDriver driver)
-        {
-            //Search button have name 'btnK'
-            return driver.FindElements(By.Name("btnK")).First();
-        }
 
         public static IWebElement? FindUrlInSearch(IWebDriver driver, string url)
         {
