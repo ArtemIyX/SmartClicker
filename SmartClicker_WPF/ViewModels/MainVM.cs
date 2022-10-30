@@ -25,13 +25,15 @@ namespace SmartClicker_WPF.ViewModels
         private FooManager _fooManager;
         private ProxyService _proxyService;
         private WebService _webService;
+        private InputService _inputService;
         private CancellationTokenSource _cancelTokenSource;
-        public MainVM(WebService WebService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
+        public MainVM(WebService WebService, InputService inputService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
         {
             _webService = WebService;
             _settingsService = SettingsService;
             _fooManager = FooManager;
             _proxyService = ProxyService;
+            _inputService = inputService;
             _settingsJson = _settingsService.GetSettingsObject();
 
             Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
@@ -181,7 +183,8 @@ namespace SmartClicker_WPF.ViewModels
             CheckBeforeStart();
             _cancelTokenSource = new CancellationTokenSource();
             WebTasker tasker = new WebTasker(_cancelTokenSource.Token, 
-                _webService, 
+                _webService,
+                _inputService,
                 _siteUrl, 
                 _keyWords, 
                 GetDriverPath(), 

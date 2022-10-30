@@ -25,6 +25,7 @@ namespace SmartClicker_WPF.Services
         private readonly string _password;
         private readonly bool _useProxy;
         private readonly WebService _webService;
+        private readonly InputService _inputService;
         private readonly string _site;
         private readonly string _keywords;
         private readonly string _driverPath;
@@ -33,16 +34,20 @@ namespace SmartClicker_WPF.Services
         private Task _backgroundCheckTask;
 
         private List<string> _keys = new List<string>();
+        private int keysIndex = 0;
 
         public event Action<string> OnFinished;
         public event Action<string> OnLog;
 
+        //TODO: To struct
         public int CancelCheckDelayMs { get; set; } = 500;
         public int FindCookieButtonTimeOutS { get; set; } = 30;
-        public int FindSearchTimeOutS { get; set; } = 30;
+        public int FindSearchBarTimeOutS { get; set; } = 30;
+        public int FindSearchButtonTimeOutS { get; set; } = 30;
 
         public WebTasker(CancellationToken cancellationToken, 
             WebService webService,
+            InputService inputService,
             string site,
             string keywords,
             string driverPath, 
@@ -52,8 +57,10 @@ namespace SmartClicker_WPF.Services
         {
             _cancellationToken = cancellationToken;
             _webService = webService;
+            _inputService = inputService;
             _site = site;
             _keywords = keywords;
+            _keys = _inputService.SplitKeyWords(_keywords);
             _driverPath = driverPath;
             _timeOut = timeOut;
             _webDriverType = webDriverType;
@@ -63,6 +70,7 @@ namespace SmartClicker_WPF.Services
 
         public WebTasker(CancellationToken cancellationToken, 
             WebService webService,
+            InputService inputService,
             string site,
             string keywords,
             string driverPath, 
@@ -73,18 +81,13 @@ namespace SmartClicker_WPF.Services
             WebProxyType proxyType,
             string username, 
             string password) 
-            : this(cancellationToken, webService, site, keywords, driverPath, timeOut, webDriverType, loops)
+            : this(cancellationToken, webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops)
         {
             _proxies = proxies;
             _proxyType = proxyType;
             _username = username;
             _password = password;
             _useProxy = true;
-        }
-
-        private List<string> SplitKeyWords()
-        {
-            return null;
         }
 
         public async Task Run()
@@ -96,13 +99,35 @@ namespace SmartClicker_WPF.Services
             if (_driver == null)
                 throw new Exception("Driver has not been initialized");
 
-            _driver.Navigate().GoToUrl(GoogleURL); // go to google url
+            _driver.Navigate().GoToUrl(GoogleURL); 
             await AccepCookiesGoogle();
+            string selectedKey = _keys[keysIndex];
+            await TypeSearchingQeury(selectedKey);
+            await PressSearchingButton();
         }
-        private async Task SearchFor(string query)
+
+        private async Task PressSearchingButton()
         {
-            OnLog.Invoke("Looking google search input...");
-            WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
+            OnLog.Invoke("Looking for google search button...");
+            WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindSearchButtonTimeOutS));
+            IWebElement? searchButton = wait.Until(drv =>
+            {
+                return GoogleFinder.GetMainGoogleSearchButton(drv);
+            });
+            if(searchButton == null)
+            {
+                FinishWork("Can not find google search button");
+                return;
+            }
+            OnLog.Invoke("Found google search button");
+            await Task.Delay(500);
+            searchButton.Click();
+        }
+
+        private async Task TypeSearchingQeury(string query)
+        {
+            OnLog.Invoke("Looking for google search input...");
+            WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindSearchBarTimeOutS));
             IWebElement? searchInput = wait.Until(drv =>
             {
                 return GoogleFinder.GetMainGoogleSearchInput(drv);
@@ -112,8 +137,13 @@ namespace SmartClicker_WPF.Services
                 FinishWork("Can not find google search input");
                 return;
             }
+            OnLog.Invoke("Found google search input");
             
+            searchInput.Clear();
+            searchInput.SendKeys(query);
+            await Task.Delay(500);
         }
+
         private async Task AccepCookiesGoogle()
         {
             OnLog.Invoke("Looking for cookies button...");

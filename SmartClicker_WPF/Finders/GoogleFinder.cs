@@ -38,5 +38,10 @@ namespace SmartClicker_WPF.Finders
             }
             return null;
         }
+
+        public static IWebElement? GetMainGoogleSearchButton(IWebDriver driver)
+        {
+            return driver.FindElements(By.Name("btnK")).First();
+        }
     }
 }
