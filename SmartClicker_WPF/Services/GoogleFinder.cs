@@ -86,10 +86,13 @@ namespace SmartClicker_WPF.Finders
             foreach (var a in links)
             {
                 string href = a.GetAttribute("href");
-                //Href must contain our url
-                if (href.Contains(url))
+                if (!string.IsNullOrEmpty(href))
                 {
-                    return a;
+                    //Href must contain our url
+                    if (href.Contains(url))
+                    {
+                        return a;
+                    }
                 }
             }
             return null;

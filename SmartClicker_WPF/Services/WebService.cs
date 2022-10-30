@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Chrome.ChromeDriverExtensions;
 using OpenQA.Selenium.Edge;
@@ -104,16 +105,31 @@ namespace SmartClicker_WPF.Services
             return new ChromeDriver();
         }
 
+        private ChromeOptions CreateChromeOptions()
+        {
+            ChromeOptions options = new ChromeOptions();
+            /*object hideAutoBanner = new
+            {
+                enabled_labs_experiments = new string[] { "enable-automation" }
+            };*/
+            options.AddArgument("--start-maximized");
+            options.AddExcludedArgument("enable-automation");
+           /* options.AddAdditionalCapability("useAutomationExtension", false);
+            options.AddLocalStatePreference("excludeSwitches", hideAutoBanner);
+            options.AddLocalStatePreference("useAutomationExtension", false);
+            options.AddArgument("disable-infobars");*/
+            return options;
+        }
+
         public ChromeDriver CreateChromeDriver(string path)
         {
-            var options = new ChromeOptions();
-            var driver = new ChromeDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
+            var driver = new ChromeDriver(path, CreateChromeOptions(), TimeSpan.FromSeconds(TimeOutSec));
             return driver;
         }
 
         public ChromeDriver CreateChromeDriverWithProxy(string path, WebProxyType webProxyType, string ip)
         {
-            var options = new ChromeOptions();
+            var options = CreateChromeOptions();
             OpenQA.Selenium.Proxy proxy = CreateProxy(webProxyType, ip);
             options.Proxy = proxy;
             var driver = new ChromeDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
@@ -125,7 +141,7 @@ namespace SmartClicker_WPF.Services
             string username,
             string password)
         {
-            var options = new ChromeOptions();
+            var options = CreateChromeOptions();
             string[] ip_port = ip.Split(":");
             options.AddHttpProxy(ip_port[0], int.Parse(ip_port[1]), username, password);
             var driver = new ChromeDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
