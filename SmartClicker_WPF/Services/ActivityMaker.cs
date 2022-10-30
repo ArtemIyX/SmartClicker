@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,32 @@ namespace SmartClicker_WPF.Services
             }
         }
 
+        public static async Task SlowScrollTo(IWebDriver webDriver, string cssSelector, int speed = 100, int minDelay = 250, int maxDelay = 1000)
+        {
+            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
+            IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
+            double y = (double)js.ExecuteScript($"return document.querySelector('{cssSelector}').getBoundingClientRect()['y']");
+            Console.WriteLine(y);
+            for (int i = 0; i < (int)y; i += speed)
+            {
+                js.ExecuteScript("window.scrollTo(0, " + i +");");
+            }
+            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
+        }
+        public static async Task SlowScrollTo(IWebDriver webDriver, IWebElement webElement, int speed = 100, int minDelay = 250, int maxDelay = 1000)
+        {
+            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
+            IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
+            ILocatable locatable = (ILocatable)webElement;
+            ICoordinates viewPortLocation = locatable.Coordinates;
+            int y = viewPortLocation.LocationInViewport.Y;
+            for (int i = 0; i < y; i += speed)
+            {
+                js.ExecuteScript("window.scrollTo(0, " + i + ");");
+            }
+            await Task.Delay(MakerRandom.Next(minDelay, maxDelay) * 2);
+        }
+
         public static async Task ScrollTo(IWebDriver webDriver, IWebElement webElement, int minDelay = 250, int maxDelay = 1000)
         {
             await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
@@ -61,6 +88,7 @@ namespace SmartClicker_WPF.Services
             actions.Perform();
             await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
         }
+      
 
         public static Task<IWebElement?> WaitUntilElementFound(IWebDriver webDriver, int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
             => Task.Run(() =>
@@ -111,7 +139,7 @@ namespace SmartClicker_WPF.Services
                             // Scroll to link
                             try
                             {
-                                await ActivityMaker.ScrollTo(_driver, el);
+                                await ActivityMaker.SlowScrollTo(_driver, el);
                             }
                             catch (Exception)
                             {
@@ -153,6 +181,8 @@ namespace SmartClicker_WPF.Services
             }
         }
 
+
+
         private async Task ScrollToRandomElement()
         {
             int i = 500;
@@ -163,7 +193,7 @@ namespace SmartClicker_WPF.Services
                 {
                     try
                     {
-                        await ActivityMaker.ScrollTo(_driver, el);
+                        await ActivityMaker.SlowScrollTo(_driver, el);
                         return;
                     }
                     catch (Exception)

@@ -3,10 +3,12 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Internal;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,13 +30,16 @@ public class Program
             driver.execute_script("window.scrollTo(0, "+str(x)+");")
          */
         Thread.Sleep(2500);
+        WebElement el = (WebElement)webDriver.FindElement(By.ClassName("tagcloud"));
+        ILocatable locatable = (ILocatable)el;
+        ICoordinates viewPortLocation = locatable.Coordinates;
+        int x = viewPortLocation.LocationInViewport.X;
+        int y = viewPortLocation.LocationInViewport.Y;
+        Console.WriteLine($"C#: x:{x}, y:{y}");
         IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
-        double y = (double)js.ExecuteScript("return document.querySelector('.tagcloud').getBoundingClientRect()['y']");
-        Console.WriteLine(y);
-        for(int i = 0; i < (int)y; ++i)
-        {
-            js.ExecuteScript("window.scrollTo(0, " + i + ");");
-        }
+        double _y = (double)js.ExecuteScript("return document.querySelector('.tagcloud').getBoundingClientRect()['y']");
+        Console.WriteLine($"JS: {_y}");
+
     }
 
     public static IWebElement GetGoogleSearchMainInput()
