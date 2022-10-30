@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -24,6 +25,7 @@ namespace SmartClicker_WPF.ViewModels
         private FooManager _fooManager;
         private ProxyService _proxyService;
         private WebService _webService;
+        private CancellationTokenSource _cancelTokenSource;
         public MainVM(WebService WebService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
         {
             _webService = WebService;
@@ -169,18 +171,19 @@ namespace SmartClicker_WPF.ViewModels
         [RelayCommand]
         public async Task Start()
         {
-            WebTasker tasker = new WebTasker(_webService, GetDriverPath(), _timeOut, (WebDriverType)(Drivers.IndexOf(SelectedDriver)), _loops);
+            _cancelTokenSource = new CancellationTokenSource();
+            WebTasker tasker = new WebTasker(_cancelTokenSource.Token, _webService, GetDriverPath(), _timeOut, (WebDriverType)(Drivers.IndexOf(SelectedDriver)), _loops);
             InProgress = true;
             tasker.OnFinished += Tasker_OnFinished;
-            await tasker.Start();
-
-
+            tasker.Start();
+            await Task.Delay(1000);
+            _cancelTokenSource.Cancel();
         }
 
         private void Tasker_OnFinished()
         {
             InProgress = false;
-            throw new NotImplementedException("Hello blyad");
+
         }
 
         private string GetDriverPath()

@@ -233,14 +233,16 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="45"/>
                 </Grid.RowDefinitions>
-                <ListBox ItemsSource="{Binding Logs}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type mm:LogModel}">
-                            <TextBlock Text="{Binding Log}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    
-                </ListBox>
+                <GroupBox Header="Logs" Margin="5">
+                    <ListBox ItemsSource="{Binding Logs}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type mm:LogModel}">
+                                <TextBlock Text="{Binding Log}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
+                
                 <Button Grid.Row="1" 
                         HorizontalAlignment="Right" 
                         Margin="2" 
