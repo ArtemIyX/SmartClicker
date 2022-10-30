@@ -178,6 +178,7 @@ namespace SmartClicker_WPF.ViewModels
         [RelayCommand]
         public async Task Start()
         {
+            CheckBeforeStart();
             _cancelTokenSource = new CancellationTokenSource();
             WebTasker tasker = new WebTasker(_cancelTokenSource.Token, 
                 _webService, 
@@ -195,6 +196,23 @@ namespace SmartClicker_WPF.ViewModels
             Task cancelTask = CancelAfterTimeout();
             await tasker.Run();
         }
+
+        private void CheckBeforeStart()
+        {
+            if (UseProxy && string.IsNullOrEmpty(ProxyList)) 
+                throw new Exception("Proxy list is empty");
+            if (string.IsNullOrEmpty(KeyWords)) 
+                throw new Exception("Keywords are empty");
+            if (string.IsNullOrEmpty(SiteUrl)) 
+                throw new Exception("Site url is empty");
+            if (_loops <= 0) 
+                throw new Exception("Incorrect format: Loops");
+            if (SelectedDriver == null) 
+                throw new Exception("Selected driver is null");
+            if (Detects.Count <= 0) 
+                throw new Exception("Ad detection not configured");
+        }
+
         private async Task CancelAfterTimeout()
         {
             await Task.Delay(TimeOut * 1000);

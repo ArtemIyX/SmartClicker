@@ -11,8 +11,6 @@ namespace SmartClicker_WPF.Finders
     {
         public static IWebElement? GetAcceptCookieButton(IWebDriver driver)
         {
-            if (driver == null)
-                throw new Exception("Attempted to find elements on page, but driver was null");
             var elements = driver.FindElements(By.XPath("//*[@role='none']"));
 
             IWebElement? divWithRole = null;
@@ -24,6 +22,21 @@ namespace SmartClicker_WPF.Finders
                 divWithRole = elements.Last();
 
             return divWithRole?.FindElement(By.XPath("./.."));
+        }
+
+        public static IWebElement? GetMainGoogleSearchInput(IWebDriver driver)
+        {
+            var elements = driver.FindElements(By.XPath("//*[@type='text']"));
+            foreach(var el in elements)
+            {
+                if(el.GetAttribute("name") == "q"
+                    || el.GetAttribute("maxlength") == "2048"
+                    || el.GetAttribute("autocorrect") == "off")
+                {
+                    return el;
+                }
+            }
+            return null;
         }
     }
 }

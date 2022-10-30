@@ -32,11 +32,14 @@ namespace SmartClicker_WPF.Services
         private CancellationToken _cancellationToken;
         private Task _backgroundCheckTask;
 
+        private List<string> _keys = new List<string>();
+
         public event Action<string> OnFinished;
         public event Action<string> OnLog;
 
         public int CancelCheckDelayMs { get; set; } = 500;
         public int FindCookieButtonTimeOutS { get; set; } = 30;
+        public int FindSearchTimeOutS { get; set; } = 30;
 
         public WebTasker(CancellationToken cancellationToken, 
             WebService webService,
@@ -69,16 +72,9 @@ namespace SmartClicker_WPF.Services
             ICollection<string> proxies, 
             WebProxyType proxyType,
             string username, 
-            string password)
+            string password) 
+            : this(cancellationToken, webService, site, keywords, driverPath, timeOut, webDriverType, loops)
         {
-            _cancellationToken = cancellationToken;
-            _webService = webService;
-            _site = site;
-            _keywords = keywords;
-            _webDriverType = webDriverType;
-            _driverPath = driverPath;
-            _timeOut = timeOut;
-            _loops = loops;
             _proxies = proxies;
             _proxyType = proxyType;
             _username = username;
@@ -86,6 +82,10 @@ namespace SmartClicker_WPF.Services
             _useProxy = true;
         }
 
+        private List<string> SplitKeyWords()
+        {
+            return null;
+        }
 
         public async Task Run()
         {
@@ -99,7 +99,21 @@ namespace SmartClicker_WPF.Services
             _driver.Navigate().GoToUrl(GoogleURL); // go to google url
             await AccepCookiesGoogle();
         }
-
+        private async Task SearchFor(string query)
+        {
+            OnLog.Invoke("Looking google search input...");
+            WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
+            IWebElement? searchInput = wait.Until(drv =>
+            {
+                return GoogleFinder.GetMainGoogleSearchInput(drv);
+            });
+            if (searchInput == null)
+            {
+                FinishWork("Can not find google search input");
+                return;
+            }
+            
+        }
         private async Task AccepCookiesGoogle()
         {
             OnLog.Invoke("Looking for cookies button...");
