@@ -108,16 +108,9 @@ namespace SmartClicker_WPF.Services
         private ChromeOptions CreateChromeOptions()
         {
             ChromeOptions options = new ChromeOptions();
-            /*object hideAutoBanner = new
-            {
-                enabled_labs_experiments = new string[] { "enable-automation" }
-            };*/
             options.AddArgument("--start-maximized");
+            options.AddArgument("--disable-popup-blocking");
             options.AddExcludedArgument("enable-automation");
-           /* options.AddAdditionalCapability("useAutomationExtension", false);
-            options.AddLocalStatePreference("excludeSwitches", hideAutoBanner);
-            options.AddLocalStatePreference("useAutomationExtension", false);
-            options.AddArgument("disable-infobars");*/
             return options;
         }
 

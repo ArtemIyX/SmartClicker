@@ -18,6 +18,8 @@ namespace SmartClicker_WPF.Services
         public static Random MakerRandom;
 
         public int LinkTimeout { get; set; } = 10;
+        public string GoogleDismisButtonId { get; set; } = "dismiss-button";
+        public string GoogleAdDivId { get; set; } = "ad_position_box";
 
         static ActivityMaker()
         {
@@ -42,9 +44,7 @@ namespace SmartClicker_WPF.Services
                 int n = MakerRandom.Next(4);
                 for (int i = 0; i < n; ++i)
                 {
-
                     await ScrollToRandomElement();
-
                 }
 
                 await GoToRandomLink();
@@ -63,9 +63,19 @@ namespace SmartClicker_WPF.Services
         }
 
         public static Task<IWebElement?> WaitUntilElementFound(IWebDriver webDriver, int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
-            => Task.Run(() => new WebDriverWait(webDriver, new TimeSpan(0, 0, waitTimeOut)).Until(Condition));
+            => Task.Run(() =>
+            {
+                try
+                {
+                    return new WebDriverWait(webDriver, new TimeSpan(0, 0, waitTimeOut)).Until(Condition);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message, ex);
+                }
+            });
 
-        public static async Task<(IWebElement?, Exception? ex)> WaitUntilElemenFoundSave(IWebDriver webDriver, int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
+        public static async Task<(IWebElement?, Exception? ex)> WaitUntilElementFoundSave(IWebDriver webDriver, int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
         {
             try
             {
@@ -77,9 +87,9 @@ namespace SmartClicker_WPF.Services
                 return (null, ex);
             }
         }
-
         private async Task GoToRandomLink()
         {
+
             string currentUrl = _driver.Url;
             int i = 500;
             while (i > 0)
@@ -105,7 +115,8 @@ namespace SmartClicker_WPF.Services
                             }
                             catch (Exception)
                             {
-                                continue;
+                                _driver.Navigate().Refresh();
+                                return;
                             }
 
                             // Click in link
@@ -115,12 +126,13 @@ namespace SmartClicker_WPF.Services
                             }
                             catch (Exception)
                             {
-                                continue;
+                                _driver.Navigate().Refresh();
+                                return;
                             }
                             // Wait
                             await Task.Delay(1000);
                             // Find new element in site
-                            (IWebElement? newElement, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, LinkTimeout, drv =>
+                            (IWebElement? newElement, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, LinkTimeout, drv =>
                             {
                                 return drv.FindElement(By.TagName("div"));
                             });

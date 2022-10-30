@@ -121,7 +121,7 @@ namespace SmartClicker_WPF.Services
             await TypeSearchingQeury(selectedKey);
             await PressSearchingButton();
             await GoOnWebSite();
-            await DoSomeActivityFor(30);
+            await DoSomeActivityFor(240);
         }
 
 
@@ -173,7 +173,7 @@ namespace SmartClicker_WPF.Services
             OnLog.Invoke($"Waiting for page {_pageIndex}...");
 
             // Wait until page is loaded
-            (IWebElement? nav_table, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, NavTableSearchTiemOutS, drv =>
+            (IWebElement? nav_table, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, NavTableSearchTiemOutS, drv =>
             {
                 return GoogleFinder.GetGooglePageTable(drv);
             });
@@ -207,7 +207,7 @@ namespace SmartClicker_WPF.Services
                 return;
             }
 
-            (IWebElement? pageLink, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, PageSearchTimeOutS, drv =>
+            (IWebElement? pageLink, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, PageSearchTimeOutS, drv =>
             {
                 return GoogleFinder.GetGooglePageLink(nav_table, _pageIndex);
             });
@@ -231,7 +231,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for google search button...");
 
-            (IWebElement? searchButton, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, FindSearchButtonTimeOutS, drv =>
+            (IWebElement? searchButton, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, FindSearchButtonTimeOutS, drv =>
             {
                 return GoogleFinder.GetMainGoogleSearchButton(drv);
             });
@@ -249,7 +249,7 @@ namespace SmartClicker_WPF.Services
         private async Task TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
-            (IWebElement? searchInput, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, FindSearchBarTimeOutS, drv =>
+            (IWebElement? searchInput, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, FindSearchBarTimeOutS, drv =>
             {
                 return GoogleFinder.GetMainGoogleSearchInput(drv);
             });
@@ -273,7 +273,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
-            (IWebElement? cookieButton, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, FindCookieButtonTimeOutS, drv =>
+            (IWebElement? cookieButton, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, FindCookieButtonTimeOutS, drv =>
             {
                 return GoogleFinder.GetAcceptCookieButton(drv);
             });
