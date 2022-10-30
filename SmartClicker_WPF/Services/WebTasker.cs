@@ -24,6 +24,8 @@ namespace SmartClicker_WPF.Services
         private readonly string _password;
         private readonly bool _useProxy;
         private readonly WebService _webService;
+        private readonly string _site;
+        private readonly string _keywords;
         private readonly string _driverPath;
         private readonly int _timeOut;
         private CancellationToken _cancellationToken;
@@ -35,10 +37,19 @@ namespace SmartClicker_WPF.Services
         public int CancelCheckDelayMs { get; set; } = 500;
         public int FindCookieButtonTimeOutS { get; set; } = 30;
 
-        public WebTasker(CancellationToken cancellationToken, WebService webService, string driverPath, int timeOut, WebDriverType webDriverType, int loops)
+        public WebTasker(CancellationToken cancellationToken, 
+            WebService webService,
+            string site,
+            string keywords,
+            string driverPath, 
+            int timeOut, 
+            WebDriverType webDriverType, 
+            int loops)
         {
             _cancellationToken = cancellationToken;
             _webService = webService;
+            _site = site;
+            _keywords = keywords;
             _driverPath = driverPath;
             _timeOut = timeOut;
             _webDriverType = webDriverType;
@@ -46,12 +57,23 @@ namespace SmartClicker_WPF.Services
             _useProxy = false;
         }
 
-        public WebTasker(CancellationToken cancellationToken, WebService webService, string driverPath, int timeOut, WebDriverType webDriverType, int loops,
-            ICollection<string> proxies, WebProxyType proxyType,
-            string username, string password)
+        public WebTasker(CancellationToken cancellationToken, 
+            WebService webService,
+            string site,
+            string keywords,
+            string driverPath, 
+            int timeOut, 
+            WebDriverType webDriverType, 
+            int loops,
+            ICollection<string> proxies, 
+            WebProxyType proxyType,
+            string username, 
+            string password)
         {
             _cancellationToken = cancellationToken;
             _webService = webService;
+            _site = site;
+            _keywords = keywords;
             _webDriverType = webDriverType;
             _driverPath = driverPath;
             _timeOut = timeOut;
@@ -76,6 +98,7 @@ namespace SmartClicker_WPF.Services
             _driver.Navigate().GoToUrl(GoogleURL); // go to google url
             await AccepCookiesGoogle();
         }
+
         private async Task AccepCookiesGoogle()
         {
             OnLog.Invoke("Looking for cookies button...");

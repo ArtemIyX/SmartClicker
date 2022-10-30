@@ -176,6 +176,7 @@
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="200"/>
                 </Grid.RowDefinitions>
                 <GroupBox Header="Proxy" Margin="5">
                     <Grid>
@@ -227,6 +228,26 @@
                              Text="{Binding ProxyPassword}"/>
                     </Grid>
                 </GroupBox>
+                <GroupBox Grid.Row="1" Margin="5" Header="Keys">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Keywords"
+                                   Style="{DynamicResource MaterialDesignCaptionTextBlock}"
+                                   VerticalAlignment="Bottom"/>
+                        <Border Grid.Row="2" 
+                                Margin="2"
+                                Background="{DynamicResource MaterialDesignChipBackground}">
+                            <TextBox md:HintAssist.Hint="Best Gardening"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Visible" Margin="2"
+                                 Text="{Binding KeyWords}"/>
+                        </Border>
+                    </Grid>
+                </GroupBox>
             </Grid>
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
@@ -242,7 +263,7 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </GroupBox>
-                
+
                 <Button Grid.Row="1" 
                         HorizontalAlignment="Right" 
                         Margin="2" 
@@ -254,5 +275,5 @@
             </Grid>
         </Grid>
     </DockPanel>
-    
+
 </Window>

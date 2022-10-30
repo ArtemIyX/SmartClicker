@@ -44,6 +44,7 @@ namespace SmartClicker_WPF.ViewModels
             TimeOut = 60;
             Loops = 5;
             SiteUrl = @"101gardentools.com";
+            KeyWords = "";
             InProgress = false;
         }
 
@@ -63,6 +64,9 @@ namespace SmartClicker_WPF.ViewModels
 
         [ObservableProperty]
         private int _selectedProxyTypeIndex;
+
+        [ObservableProperty]
+        private string _keyWords;
 
         [ObservableProperty]
         private string _proxyUserName;
@@ -175,17 +179,26 @@ namespace SmartClicker_WPF.ViewModels
         public async Task Start()
         {
             _cancelTokenSource = new CancellationTokenSource();
-            WebTasker tasker = new WebTasker(_cancelTokenSource.Token, _webService, GetDriverPath(), _timeOut, (WebDriverType)(Drivers.IndexOf(SelectedDriver)), _loops);
+            WebTasker tasker = new WebTasker(_cancelTokenSource.Token, 
+                _webService, 
+                _siteUrl, 
+                _keyWords, 
+                GetDriverPath(), 
+                _timeOut, 
+                (WebDriverType)(Drivers.IndexOf(SelectedDriver)), 
+                _loops);
+
             InProgress = true;
             tasker.OnFinished += Tasker_OnFinished;
             tasker.OnLog += Tasker_OnLog;
 
-            Task cancelTask = Task.Run(() =>
-            {
-                Task.Delay(TimeOut);
-                _cancelTokenSource.Cancel();
-            });
+            Task cancelTask = CancelAfterTimeout();
             await tasker.Run();
+        }
+        private async Task CancelAfterTimeout()
+        {
+            await Task.Delay(TimeOut);
+            _cancelTokenSource.Cancel();
         }
 
         private void Tasker_OnLog(string log)
