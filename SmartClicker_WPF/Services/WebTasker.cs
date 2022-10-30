@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
@@ -27,9 +28,12 @@ namespace SmartClicker_WPF.Services
         private readonly int _timeOut;
         private CancellationToken _cancellationToken;
         private Task _backgroundCheckTask;
+
         public event Action<string> OnFinished;
+        public event Action<string> OnLog;
 
         public int CancelCheckDelayMs { get; set; } = 500;
+        public int FindCookieButtonTimeOutS { get; set; } = 30;
 
         public WebTasker(CancellationToken cancellationToken, WebService webService, string driverPath, int timeOut, WebDriverType webDriverType, int loops)
         {
@@ -57,6 +61,57 @@ namespace SmartClicker_WPF.Services
             _username = username;
             _password = password;
             _useProxy = true;
+        }
+
+
+        public async Task Run()
+        {
+            _backgroundCheckTask = Task.Run(() => { BackgroundChecking(); });
+
+            InitDriver(0);
+
+            if (_driver == null)
+                throw new Exception("Driver has not been initialized");
+
+            _driver.Navigate().GoToUrl(GoogleURL); // go to google url
+            await AccepCookiesGoogle();
+        }
+        private async Task AccepCookiesGoogle()
+        {
+            OnLog.Invoke("Looking for cookies button...");
+            WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
+            IWebElement? cookieButton = wait.Until(drv =>
+            {
+                return WebTasker.GetAcceptCookieButton(drv);
+            });
+            if (cookieButton != null)
+            {
+                await Task.Delay(500);
+                cookieButton.Click();
+                OnLog.Invoke("Accepted cookies");
+            }
+            else
+            {
+                OnLog.Invoke("Cookies button not found");
+            }
+        }
+
+        private static IWebElement? GetAcceptCookieButton(IWebDriver driver)
+        {
+            if (driver == null)
+                throw new Exception("Attempted to find elements on page, but driver was null");
+            var elements = driver.FindElements(By.XPath("//*[@role='none']"));
+
+            IWebElement? divWithRole = null;
+            if (elements.Count == 0)
+                return null;
+            else if (elements.Count == 1)
+                divWithRole = elements.First();
+            else if (elements.Count > 1)
+                divWithRole = elements.Last();
+
+            //return parent (button)
+            return divWithRole?.FindElement(By.XPath("./.."));
         }
 
         public void InitDriver(int index = 0)
@@ -111,7 +166,7 @@ namespace SmartClicker_WPF.Services
                     CheckCancel();
                     Task.Delay(CancelCheckDelayMs);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     FinishWork("Aborted");
                     break;
@@ -119,14 +174,6 @@ namespace SmartClicker_WPF.Services
             }
         }
 
-        public void Start()
-        {
-            _backgroundCheckTask = Task.Run(() => { BackgroundChecking();});
-            InitDriver(0);
-            if (_driver == null)
-                throw new Exception("Driver has not been initialized");
-            _driver.Navigate().GoToUrl("");
-        }
 
     }
 }

@@ -33,9 +33,12 @@ namespace SmartClicker_WPF.ViewModels
             _fooManager = FooManager;
             _proxyService = ProxyService;
             _settingsJson = _settingsService.GetSettingsObject();
+
             Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
             Detects = new ObservableCollection<AdDetect>();
             ProxyTypes = new ObservableCollection<string>(_proxyService.GetProxyTypesString());
+            Logs = new ObservableCollection<LogModel>();
+
             SelectedProxyTypeIndex = 0;
             SelectedDriver = Drivers[0];
             TimeOut = 60;
@@ -121,7 +124,7 @@ namespace SmartClicker_WPF.ViewModels
             window.ViewModel.SelectedDetectTypeIndex = (int)adDetect.Type;
 
             int index = Detects.IndexOf(adDetect);
-            
+
 
             window.ShowDialog();
 
@@ -175,9 +178,19 @@ namespace SmartClicker_WPF.ViewModels
             WebTasker tasker = new WebTasker(_cancelTokenSource.Token, _webService, GetDriverPath(), _timeOut, (WebDriverType)(Drivers.IndexOf(SelectedDriver)), _loops);
             InProgress = true;
             tasker.OnFinished += Tasker_OnFinished;
-            tasker.Start();
-            await Task.Delay(TimeOut);
-            _cancelTokenSource.Cancel();
+            tasker.OnLog += Tasker_OnLog;
+
+            Task cancelTask = Task.Run(() =>
+            {
+                Task.Delay(TimeOut);
+                _cancelTokenSource.Cancel();
+            });
+            await tasker.Run();
+        }
+
+        private void Tasker_OnLog(string log)
+        {
+            Logs.Add(new LogModel() { Log = $"{_selectedDriver.Title} driver: {log}" });
         }
 
         private void Tasker_OnFinished(string reason)
