@@ -19,9 +19,22 @@ public class Program
     public static void Main(string[] args)
     {
         driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";
-        baseUrl = @"http://azenv.net/";
+        baseUrl = @"https://101gardentools.com/";
         webDriver = GetChromeDriver();
         webDriver.Navigate().GoToUrl(baseUrl);
+        /*
+         y = driver.execute_script("return document.querySelector('YOUR-CSS-SELECTOR').getBoundingClientRect()['y']")
+        for x in range(0, int(y), 100):
+            driver.execute_script("window.scrollTo(0, "+str(x)+");")
+         */
+        Thread.Sleep(2500);
+        IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
+        double y = (double)js.ExecuteScript("return document.querySelector('.tagcloud').getBoundingClientRect()['y']");
+        Console.WriteLine(y);
+        for(int i = 0; i < (int)y; ++i)
+        {
+            js.ExecuteScript("window.scrollTo(0, " + i + ");");
+        }
     }
 
     public static IWebElement GetGoogleSearchMainInput()
@@ -70,10 +83,7 @@ public class Program
     public static ChromeDriver GetChromeDriver()
     {
         var proxy = new Proxy();
-        proxy.HttpProxy = "62.193.108.142:1981";
-        proxy.SslProxy = "62.193.108.142:1981";
         var options = new ChromeOptions();
-        options.Proxy = proxy;
         var driver = new ChromeDriver(driverPath, options, TimeSpan.FromSeconds(30));
         return driver;
     }

@@ -121,7 +121,7 @@ namespace SmartClicker_WPF.Services
             await TypeSearchingQeury(selectedKey);
             await PressSearchingButton();
             await GoOnWebSite();
-            await DoSomeActivityFor(240);
+            await DoSomeActivityFor(_timeOut);
         }
 
 
