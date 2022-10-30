@@ -218,7 +218,8 @@ namespace SmartClicker_WPF.ViewModels
 
         private async Task CancelAfterTimeout()
         {
-            await Task.Delay(TimeOut * 1000);
+            // 6x time for errors
+            await Task.Delay(TimeOut * 6 * 1000);
             _cancelTokenSource.Cancel();
         }
 

@@ -11,9 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace SmartClicker_WPF.Services
 {
@@ -117,11 +114,27 @@ namespace SmartClicker_WPF.Services
                 throw new Exception("Driver has not been initialized");
 
             _driver.Navigate().GoToUrl(GoogleURL);
-            await AccepCookiesGoogle();
+            await AccepGoogleCookies();
             string selectedKey = _keys.RandomElement();
             await TypeSearchingQeury(selectedKey);
             await PressSearchingButton();
             await GoOnWebSite();
+            await DoSomeActivityFor(10);
+        }
+
+
+        private async Task DoSomeActivityFor(int seconds)
+        {
+            OnLog.Invoke($"Doing some activity in {_driver.Url} for {seconds}s...");
+            ActivityMaker activityMaker = new ActivityMaker(_driver);
+            try
+            {
+                await activityMaker.DoActivityFor(seconds);
+            }
+            catch(OperationCanceledException ex)
+            {
+                OnLog.Invoke("Time is up, looking for advertising..");
+            }
         }
 
         private Task<IWebElement?> WaitUntilElementFound(int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
@@ -255,6 +268,7 @@ namespace SmartClicker_WPF.Services
             searchButton?.Click();
         }
 
+        // Main page - type some query
         private async Task TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
@@ -277,7 +291,8 @@ namespace SmartClicker_WPF.Services
             await Task.Delay(randDelay());
         }
 
-        private async Task AccepCookiesGoogle()
+        // Accept google cookies
+        private async Task AccepGoogleCookies()
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
@@ -325,6 +340,7 @@ namespace SmartClicker_WPF.Services
                 _driver = _webService.CreateWebDriver(_driverPath, _webDriverType);
             }
         }
+
         private void FinishWork(string reason)
         {
             if (_driver != null)

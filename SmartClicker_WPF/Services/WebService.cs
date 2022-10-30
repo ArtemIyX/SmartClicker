@@ -15,7 +15,6 @@ namespace SmartClicker_WPF.Services
 {
     public class WebService
     {
-
         public int TimeOutSec { get; set; }
 
         public WebService()
@@ -89,6 +88,7 @@ namespace SmartClicker_WPF.Services
             }
             return new ChromeDriver();
         }
+
         public WebDriver CreateWebDriverWithPrivateProxy(string path, WebDriverType webDriverType,
             WebProxyType webProxyType, string ip,
             string username,
@@ -119,6 +119,7 @@ namespace SmartClicker_WPF.Services
             var driver = new ChromeDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
             return driver;
         }
+
         public ChromeDriver CreateChromeDriverWithPrivateProxy(string path,
             WebProxyType webProxyType, string ip,
             string username,
@@ -145,6 +146,7 @@ namespace SmartClicker_WPF.Services
             var driver = new FirefoxDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
             return driver;
         }
+
         public FirefoxDriver CreateFirefoxDriverWithPrivateProxy(string path,
             WebProxyType webProxyType, string ip,
             string username,
