@@ -191,7 +191,7 @@ namespace SmartClicker_WPF.ViewModels
                 _timeOut, 
                 (WebDriverType)(Drivers.IndexOf(SelectedDriver)), 
                 _loops);
-
+            tasker.MaxPageCount = 20;
             InProgress = true;
             tasker.OnFinished += Tasker_OnFinished;
             tasker.OnLog += Tasker_OnLog;

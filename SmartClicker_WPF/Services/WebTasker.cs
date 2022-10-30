@@ -36,7 +36,9 @@ namespace SmartClicker_WPF.Services
         private Task _backgroundCheckTask;
 
         private Random _rand = new Random();
-        private int randDelay() => _rand.Next(250, 750);
+        private const int _minDelay = 250;
+        private const int _maxDelay = 750;
+        private int randDelay() => _rand.Next(_minDelay, _maxDelay);
         private List<string> _keys = new List<string>();
         private int _pageIndex = 1;
 
@@ -119,7 +121,7 @@ namespace SmartClicker_WPF.Services
             await TypeSearchingQeury(selectedKey);
             await PressSearchingButton();
             await GoOnWebSite();
-            await DoSomeActivityFor(10);
+            await DoSomeActivityFor(30);
         }
 
 
@@ -131,29 +133,14 @@ namespace SmartClicker_WPF.Services
             {
                 await activityMaker.DoActivityFor(seconds);
             }
-            catch(OperationCanceledException ex)
+            catch (OperationCanceledException ex)
             {
                 OnLog.Invoke("Time is up, looking for advertising..");
             }
         }
 
-        private Task<IWebElement?> WaitUntilElementFound(int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
-            => Task.Run(() => new WebDriverWait(_driver, new TimeSpan(0, 0, waitTimeOut)).Until(Condition));
 
-        private async Task<(IWebElement?, Exception? ex)> WaitUntilElemenFoundSave(int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
-        {
-            try
-            {
-                IWebElement? el = await WaitUntilElementFound(waitTimeOut, Condition);
-                return (el, null);
-            }
-            catch (Exception ex)
-            {
-                return (null, ex);
-            }
-        }
-
-        private void ClickOnBlankArea() => /*_driver.FindElement(By.XPath("//html")).Click();*/ new Actions(_driver).MoveByOffset(0, 0).Click().Build().Perform();
+        private void ClickOnBlankArea() => new Actions(_driver).MoveByOffset(0, 0).Click().Build().Perform();
 
         // Try find site by search result
         private async Task GoOnWebSite()
@@ -180,23 +167,13 @@ namespace SmartClicker_WPF.Services
             }
         }
 
-        // Scroll to element with delay
-        private async Task ScrollTo(IWebElement webElement)
-        {
-            await Task.Delay(randDelay());
-            Actions actions = new Actions(_driver);
-            actions.MoveToElement(webElement);
-            actions.Perform();
-            await Task.Delay(randDelay());
-        }
-
         // Get navigation table of google (bottom numbers)
         private async Task<(bool, IWebElement?)> GetNavTable()
         {
             OnLog.Invoke($"Waiting for page {_pageIndex}...");
 
             // Wait until page is loaded
-            (IWebElement? nav_table, Exception? ex) = await WaitUntilElemenFoundSave(NavTableSearchTiemOutS, drv =>
+            (IWebElement? nav_table, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, NavTableSearchTiemOutS, drv =>
             {
                 return GoogleFinder.GetGooglePageTable(drv);
             });
@@ -216,7 +193,7 @@ namespace SmartClicker_WPF.Services
         private async Task GoToSiteByLink(IWebElement link)
         {
             OnLog.Invoke($"Url found on page {_pageIndex}");
-            await ScrollTo(link);
+            await ActivityMaker.ScrollTo(_driver, link, _minDelay, _maxDelay);
             link.Click();
         }
 
@@ -230,7 +207,7 @@ namespace SmartClicker_WPF.Services
                 return;
             }
 
-            (IWebElement? pageLink, Exception? ex) = await WaitUntilElemenFoundSave(PageSearchTimeOutS, drv =>
+            (IWebElement? pageLink, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, PageSearchTimeOutS, drv =>
             {
                 return GoogleFinder.GetGooglePageLink(nav_table, _pageIndex);
             });
@@ -243,7 +220,7 @@ namespace SmartClicker_WPF.Services
 
             if (pageLink != null)
             {
-                await ScrollTo(pageLink);
+                await ActivityMaker.ScrollTo(_driver, pageLink, _minDelay, _maxDelay);
             }
             pageLink?.Click();
 
@@ -254,7 +231,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for google search button...");
 
-            (IWebElement? searchButton, Exception? ex) = await WaitUntilElemenFoundSave(FindSearchButtonTimeOutS, drv =>
+            (IWebElement? searchButton, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, FindSearchButtonTimeOutS, drv =>
             {
                 return GoogleFinder.GetMainGoogleSearchButton(drv);
             });
@@ -272,7 +249,7 @@ namespace SmartClicker_WPF.Services
         private async Task TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
-            (IWebElement? searchInput, Exception? ex) = await WaitUntilElemenFoundSave(FindSearchBarTimeOutS, drv =>
+            (IWebElement? searchInput, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, FindSearchBarTimeOutS, drv =>
             {
                 return GoogleFinder.GetMainGoogleSearchInput(drv);
             });
@@ -296,7 +273,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
-            (IWebElement? cookieButton, Exception? ex) = await WaitUntilElemenFoundSave(FindCookieButtonTimeOutS, drv =>
+            (IWebElement? cookieButton, Exception? ex) = await ActivityMaker.WaitUntilElemenFoundSave(_driver, FindCookieButtonTimeOutS, drv =>
             {
                 return GoogleFinder.GetAcceptCookieButton(drv);
             });
