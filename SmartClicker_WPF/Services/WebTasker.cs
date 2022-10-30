@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SmartClicker_WPF.Finders;
 using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
@@ -105,7 +106,7 @@ namespace SmartClicker_WPF.Services
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
             IWebElement? cookieButton = wait.Until(drv =>
             {
-                return WebTasker.GetAcceptCookieButton(drv);
+                return GoogleFinder.GetAcceptCookieButton(drv);
             });
             if (cookieButton != null)
             {
@@ -117,24 +118,6 @@ namespace SmartClicker_WPF.Services
             {
                 OnLog.Invoke("Cookies button not found");
             }
-        }
-
-        private static IWebElement? GetAcceptCookieButton(IWebDriver driver)
-        {
-            if (driver == null)
-                throw new Exception("Attempted to find elements on page, but driver was null");
-            var elements = driver.FindElements(By.XPath("//*[@role='none']"));
-
-            IWebElement? divWithRole = null;
-            if (elements.Count == 0)
-                return null;
-            else if (elements.Count == 1)
-                divWithRole = elements.First();
-            else if (elements.Count > 1)
-                divWithRole = elements.Last();
-
-            //return parent (button)
-            return divWithRole?.FindElement(By.XPath("./.."));
         }
 
         public void InitDriver(int index = 0)
