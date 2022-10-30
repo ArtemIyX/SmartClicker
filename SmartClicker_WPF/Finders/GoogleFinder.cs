@@ -50,7 +50,7 @@ namespace SmartClicker_WPF.Finders
                 //if(link.GetAttribute("class") == "f1")
                 //{
                 //In attribute 'aria-lable' we have "Page N"
-                //string href = link.GetAttribute("href");
+                string href = link.GetAttribute("href");
                 string aria_lable = link.GetAttribute("aria-label");
                 if (!string.IsNullOrEmpty(aria_lable))
                 {
