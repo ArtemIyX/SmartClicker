@@ -3,10 +3,12 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Support.UI;
+using SmartClicker_WPF.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +36,6 @@ namespace SmartClicker_WPF.Services
 
         }
 
-        public static void ClickOnBlankArea(IWebDriver drv) => new Actions(drv).MoveByOffset(0, 0).Click().Build().Perform();
 
         public async Task DoActivityFor(int seconds)
         {
@@ -58,157 +59,93 @@ namespace SmartClicker_WPF.Services
             }
         }
 
-        public static async Task SlowScrollTo(IWebDriver webDriver, string cssSelector, int speed = 100, int minDelay = 250, int maxDelay = 1000)
+        private async Task<bool> GoToRandomLink()
         {
-            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
-            IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
-            double y = (double)js.ExecuteScript($"return document.querySelector('{cssSelector}').getBoundingClientRect()['y']");
-            Console.WriteLine(y);
-            for (int i = 0; i < (int)y; i += speed)
-            {
-                js.ExecuteScript("window.scrollTo(0, " + i +");");
-            }
-            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
-        }
-        public static async Task SlowScrollTo(IWebDriver webDriver, IWebElement webElement, int speed = 100, int minDelay = 250, int maxDelay = 1000)
-        {
-            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
-            IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
-            ILocatable locatable = (ILocatable)webElement;
-            ICoordinates viewPortLocation = locatable.Coordinates;
-            int y = viewPortLocation.LocationInViewport.Y;
-            for (int i = 0; i < y; i += speed)
-            {
-                js.ExecuteScript("window.scrollTo(0, " + i + ");");
-            }
-            await Task.Delay(MakerRandom.Next(minDelay, maxDelay) * 2);
-        }
-
-        public static async Task ScrollTo(IWebDriver webDriver, IWebElement webElement, int minDelay = 250, int maxDelay = 1000)
-        {
-            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
-            Actions actions = new Actions(webDriver);
-            actions.MoveToElement(webElement);
-            actions.Perform();
-            await Task.Delay(MakerRandom.Next(minDelay, maxDelay));
-        }
-      
-
-        public static Task<IWebElement?> WaitUntilElementFound(IWebDriver webDriver, int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
-            => Task.Run(() =>
-            {
-                try
-                {
-                    return new WebDriverWait(webDriver, new TimeSpan(0, 0, waitTimeOut)).Until(Condition);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message, ex);
-                }
-            });
-
-        public static async Task<(IWebElement?, Exception? ex)> WaitUntilElementFoundSave(IWebDriver webDriver, int waitTimeOut, Func<IWebDriver, IWebElement?> Condition)
-        {
-            try
-            {
-                IWebElement? el = await WaitUntilElementFound(webDriver, waitTimeOut, Condition);
-                return (el, null);
-            }
-            catch (Exception ex)
-            {
-                return (null, ex);
-            }
-        }
-       
-
-        private async Task GoToRandomLink()
-        {
-
             string currentUrl = _driver.Url;
             int i = 500;
             while (i > 0)
             {
+                i--;
                 // Pick random url
                 IWebElement? el = SiteFinder.GetRandomLink(_driver);
 
                 // Web element is correct
-                if (el != null)
+                if (el == null) continue;
+
+                //Link has href
+                string href = el.GetAttribute("href");
+                if (string.IsNullOrEmpty(href)) continue;
+
+                //And this link contains our domain
+                Uri myUri = new Uri(currentUrl);
+                if (!href.Contains(myUri.Host)) continue;
+
+                // Scroll to link
+                if (!await _driver.ScrollTo(el))
                 {
-                    //Link has href
-                    string href = el.GetAttribute("href");
-                    if (!string.IsNullOrEmpty(href))
-                    {
-                        //And this link contains our domain
-                        Uri myUri = new Uri(currentUrl);
-                        if (href.Contains(myUri.Host))
-                        {
-                            // Scroll to link
-                            try
-                            {
-                                await ActivityMaker.SlowScrollTo(_driver, el);
-                            }
-                            catch (Exception)
-                            {
-                                _driver.Navigate().Refresh();
-                                return;
-                            }
-
-                            // Click in link
-                            try
-                            {
-                                el.Click();
-                            }
-                            catch (Exception)
-                            {
-                                _driver.Navigate().Refresh();
-                                return;
-                            }
-                            // Wait
-                            await Task.Delay(1000);
-                            // Find new element in site
-                            (IWebElement? newElement, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, LinkTimeout, drv =>
-                            {
-                                return drv.FindElement(By.TagName("div"));
-                            });
-                            // we have element
-                            if (newElement != null)
-                            {
-                                // and now our url is different
-                                if (currentUrl != _driver.Url)
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
+                    _driver.Navigate().Refresh();
+                    return false;
                 }
-                i--;
+
+                // Click in link
+                if (!el.ClickSave())
+                {
+                    _driver.Navigate().Refresh();
+                    return false;
+                }
+
+                // Wait one second
+                await Task.Delay(1000);
+                // Find new element in site
+                bool loadedNewPage = await WaitUntilNewPageIsLoaded(currentUrl);
+                if (!loadedNewPage)
+                {
+                    return false;
+                }
+
+                // and now our url is different
+                if (currentUrl != _driver.Url)
+                {
+                    return true;
+                }
             }
+            return false;
+        }
+
+        private async Task<bool> WaitUntilNewPageIsLoaded(string currentUrl)
+        {
+            IWebElement? newElement = await _driver.FindElementAsync(LinkTimeout, drv =>
+            {
+                // Another url 
+                if (currentUrl == _driver.Url)
+                {
+                    return null;
+                }
+                else
+                {
+                    //And has div
+                    return drv.FindElementSave(By.TagName("div"));
+                }
+            });
+            return (newElement != null);
         }
 
 
-
-        private async Task ScrollToRandomElement()
+        private async Task<bool> ScrollToRandomElement()
         {
             int i = 500;
             while (i > 0)
             {
+                i--;
                 IWebElement? el = GetRandomElement();
                 if (el != null)
                 {
-                    try
-                    {
-                        await ActivityMaker.SlowScrollTo(_driver, el);
-                        return;
-                    }
-                    catch (Exception)
-                    {
+                    return await _driver.ScrollTo(el);
 
-                    }
                 }
-                i--;
+
             }
+            return false;
         }
 
         private IWebElement? GetRandomElement()
@@ -218,7 +155,6 @@ namespace SmartClicker_WPF.Services
             int i = 500;
             while (i > 0)
             {
-
                 switch (select)
                 {
                     case 1:

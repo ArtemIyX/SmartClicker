@@ -181,21 +181,24 @@ namespace SmartClicker_WPF.Services
         }
 
         //Scroll to link and click
-        private async Task GoToSiteByLink(IWebElement link)
+        private async Task<bool> GoToSiteByLink(IWebElement link)
         {
             OnLog.Invoke($"Url found on page {_pageIndex}");
-            await ActivityMaker.ScrollTo(_driver, link, _minDelay, _maxDelay);
-            link.Click();
+            if (await _driver.ScrollTo(link, _minDelay, _maxDelay))
+            {
+                return link.ClickSave();
+            }
+            return false;
         }
 
         // Try go to next page 
-        private async Task OpenNextPage(IWebElement nav_table)
+        private async Task<bool> OpenNextPage(IWebElement nav_table)
         {
             _pageIndex++;
             if (_pageIndex > MaxPageCount)
             {
                 FinishWork($"We are already on the {_pageIndex} page and did not find {_site}");
-                return;
+                return false;
             }
 
             IWebElement? pageLink = await _driver.FindElementAsync(PageSearchTimeOutS, drv => GoogleFinder.GetGooglePageLink(nav_table, _pageIndex));
@@ -203,19 +206,18 @@ namespace SmartClicker_WPF.Services
             if (pageLink == null)
             {
                 FinishWork($"Can not found page({_pageIndex}) link");
-                return;
+                return false;
             }
 
-            if (pageLink != null)
+            if (await _driver.ScrollTo(pageLink, _minDelay, _maxDelay))
             {
-                await ActivityMaker.SlowScrollTo(_driver, pageLink, _minDelay, _maxDelay);
+                return pageLink.ClickSave();
             }
-            pageLink?.Click();
-
+            return true;
         }
 
         // Main page - press "Find in google"
-        private async Task PressSearchingButton()
+        private async Task<bool> PressSearchingButton()
         {
             OnLog.Invoke("Looking for google search button...");
 
@@ -223,31 +225,35 @@ namespace SmartClicker_WPF.Services
             if (searchButton == null)
             {
                 FinishWork("Can not find google search button");
-                return;
+                return false;
             }
             OnLog.Invoke("Found google search button");
             await Task.Delay(randDelay());
-            searchButton?.Click();
+            return searchButton.ClickSave();
         }
 
         // Main page - type some query
-        private async Task TypeSearchingQeury(string query)
+        private async Task<bool> TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
-            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS, drv =>GoogleFinder.GetMainGoogleSearchInput(drv));
+            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS, drv => GoogleFinder.GetMainGoogleSearchInput(drv));
 
             if (searchInput == null)
             {
                 FinishWork("Can not find google search input");
-                return;
+                return false;
             }
 
             OnLog.Invoke("Found google search input");
 
-            searchInput.Clear();
-            searchInput.SendKeys(query);
-            ActivityMaker.ClickOnBlankArea(_driver);
-            await Task.Delay(randDelay());
+            searchInput.SendKeysSave(query);
+            if (_driver.ClickOnBlankArea())
+            {
+                await Task.Delay(randDelay());
+                return true;
+            }
+            return false; 
+            
         }
 
         // Accept google cookies

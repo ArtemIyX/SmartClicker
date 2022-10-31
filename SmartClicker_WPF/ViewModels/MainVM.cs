@@ -142,7 +142,7 @@ namespace SmartClicker_WPF.ViewModels
         {
             CheckBeforeStart();
             //_cancelTokenSource = new CancellationTokenSource();
-            WebTasker tasker = new WebTasker(_cancelTokenSource.Token, 
+            WebTasker tasker = new WebTasker(
                 _webService,
                 _inputService,
                 _siteUrl, 
