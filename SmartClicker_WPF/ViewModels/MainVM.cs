@@ -26,7 +26,8 @@ namespace SmartClicker_WPF.ViewModels
         private ProxyService _proxyService;
         private WebService _webService;
         private InputService _inputService;
-        private CancellationTokenSource _cancelTokenSource;
+        public WebTasker Tasker { get; private set; }
+
         public MainVM(WebService WebService, InputService inputService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
         {
             _webService = WebService;
@@ -142,7 +143,7 @@ namespace SmartClicker_WPF.ViewModels
         {
             CheckBeforeStart();
             //_cancelTokenSource = new CancellationTokenSource();
-            WebTasker tasker = new WebTasker(
+            Tasker = new WebTasker(
                 _webService,
                 _inputService,
                 _siteUrl, 
@@ -151,13 +152,13 @@ namespace SmartClicker_WPF.ViewModels
                 _timeOut, 
                 (WebDriverType)(Drivers.IndexOf(SelectedDriver)), 
                 _loops);
-            tasker.MaxPageCount = 20;
+            Tasker.MaxPageCount = 20;
             InProgress = true;
-            tasker.OnFinished += Tasker_OnFinished;
-            tasker.OnLog += Tasker_OnLog;
+            Tasker.OnFinished += Tasker_OnFinished;
+            Tasker.OnLog += Tasker_OnLog;
 
             //_cancelTokenSource.CancelAfter(TimeOut * 6 * 1000);
-            await tasker.Run();
+            await Tasker.Run();
         }
 
         private void CheckBeforeStart()

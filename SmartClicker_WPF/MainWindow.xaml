@@ -22,7 +22,8 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         ResizeMode="CanResize"
-        d:DataContext="{d:DesignInstance Type=vm:MainVM}">
+        d:DataContext="{d:DesignInstance Type=vm:MainVM}"
+        Closing="Window_Closing">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">

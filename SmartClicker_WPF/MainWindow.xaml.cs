@@ -38,5 +38,10 @@ namespace SmartClicker_WPF
         {
             this.Close();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            viewmodel.Tasker?.FinishWork("Window is closing");
+        }
     }
 }

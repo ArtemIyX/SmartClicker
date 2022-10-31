@@ -303,14 +303,21 @@ namespace SmartClicker_WPF.Services
             }
         }
 
-        private void FinishWork(string reason)
+        public void FinishWork(string reason)
         {
-            if (_driver != null)
+            try
             {
-                _driver.Manage().Cookies.DeleteAllCookies();
-                _driver.Quit();
-                _driver = null;
-                OnFinished.Invoke(reason);
+                if (_driver != null)
+                {
+                    _driver.Manage().Cookies.DeleteAllCookies();
+                    _driver.Quit();
+                    _driver = null;
+                    OnFinished.Invoke(reason);
+                }
+            }
+            catch
+            {
+
             }
         }
 
