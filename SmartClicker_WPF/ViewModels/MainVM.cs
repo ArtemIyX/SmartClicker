@@ -111,52 +111,12 @@ namespace SmartClicker_WPF.ViewModels
                 throw new Exception("Command sender is not AdDetect");
 
             Detects.Remove(selected);
-
-
-        }
-
-        [RelayCommand]
-        public void EditDetect(object sender)
-        {
-            AdDetect? adDetect = sender as AdDetect;
-            if (adDetect == null)
-                throw new Exception("Command sender is not AdDetect");
-
-            NewDetectWindow? window = _fooManager.ServiceProvider.GetService(typeof(NewDetectWindow)) as NewDetectWindow;
-            if (window == null)
-                throw new Exception("Can not get service (NewDetectWindow)");
-
-            window.ViewModel.SetValues(adDetect.Values ?? new List<DetectValue>());
-            window.ViewModel.SelectedDetectTypeIndex = (int)adDetect.Type;
-
-            int index = Detects.IndexOf(adDetect);
-
-
-            window.ShowDialog();
-
-            adDetect.Values = window.ViewModel.GetValues();
-            adDetect.Type = (AdDetectType)window.ViewModel.SelectedDetectTypeIndex;
-
-            Detects.RemoveAt(index);
-            Detects.Insert(index, adDetect);
         }
 
         [RelayCommand]
         public void AddDetect()
         {
-            NewDetectWindow? window = _fooManager.ServiceProvider.GetService(typeof(NewDetectWindow)) as NewDetectWindow;
-            if (window == null)
-                throw new Exception("Can not get service (NewDetectWindow)");
-
-            window.ShowDialog();
-            List<DetectValue> values = window.ViewModel.GetValues();
-            AdDetectType type = (AdDetectType)window.ViewModel.SelectedDetectTypeIndex;
-
-            AdDetect adDetect = new AdDetect()
-            {
-                Type = type,
-                Values = values
-            };
+            AdDetect adDetect = new AdDetect();
             Detects.Add(adDetect);
         }
 
