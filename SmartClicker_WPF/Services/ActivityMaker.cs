@@ -1,9 +1,11 @@
-﻿using OpenQA.Selenium;
+﻿using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -31,6 +33,8 @@ namespace SmartClicker_WPF.Services
             _driver = webDriver;
 
         }
+
+        public static void ClickOnBlankArea(IWebDriver drv) => new Actions(drv).MoveByOffset(0, 0).Click().Build().Perform();
 
         public async Task DoActivityFor(int seconds)
         {
@@ -115,6 +119,8 @@ namespace SmartClicker_WPF.Services
                 return (null, ex);
             }
         }
+       
+
         private async Task GoToRandomLink()
         {
 

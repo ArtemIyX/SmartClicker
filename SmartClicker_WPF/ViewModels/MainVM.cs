@@ -141,7 +141,7 @@ namespace SmartClicker_WPF.ViewModels
         public async Task Start()
         {
             CheckBeforeStart();
-            _cancelTokenSource = new CancellationTokenSource();
+            //_cancelTokenSource = new CancellationTokenSource();
             WebTasker tasker = new WebTasker(_cancelTokenSource.Token, 
                 _webService,
                 _inputService,
@@ -156,7 +156,7 @@ namespace SmartClicker_WPF.ViewModels
             tasker.OnFinished += Tasker_OnFinished;
             tasker.OnLog += Tasker_OnLog;
 
-            Task cancelTask = CancelAfterTimeout();
+            //_cancelTokenSource.CancelAfter(TimeOut * 6 * 1000);
             await tasker.Run();
         }
 
@@ -174,13 +174,6 @@ namespace SmartClicker_WPF.ViewModels
                 throw new Exception("Selected driver is null");
             if (Detects.Count <= 0) 
                 throw new Exception("Ad detection not configured");
-        }
-
-        private async Task CancelAfterTimeout()
-        {
-            // 6x time for errors
-            await Task.Delay(TimeOut * 6 * 1000);
-            _cancelTokenSource.Cancel();
         }
 
         private void Tasker_OnLog(string log)
