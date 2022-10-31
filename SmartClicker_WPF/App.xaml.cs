@@ -47,8 +47,6 @@ namespace SmartClicker_WPF
             services.AddTransient<ProxyService>();
             services.AddTransient<AdDetectService>();
             services.AddTransient<MainVM>();
-            services.AddTransient<NewDetectVM>();
-            services.AddTransient<NewDetectWindow>();
             services.AddTransient<DriverSettingsVM>();
             services.AddTransient<DriverSettingsWindow>();
             services.AddTransient<WebService>();

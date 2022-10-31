@@ -34,7 +34,7 @@
         </Menu>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -102,11 +102,23 @@
                 <GroupBox Header="Detect" Margin="5" VerticalAlignment="Stretch" Grid.Row="1">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="*"/>
                             <RowDefinition Height="45"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Style="{DynamicResource MaterialDesignOverlineTextBlock}" Text="Ad detection"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{DynamicResource MaterialDesignCaptionTextBlock}" 
+                                       Text="Ad detection" 
+                                       Grid.Column="0"
+                                       VerticalAlignment="Bottom"/>
+                            <Button Margin="5" Cursor="Hand" Command="{Binding AddDetectCommand}" Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Text="+"/>
+                            </Button>
+                        </Grid>
+                        
                         <Border Background="{DynamicResource MaterialDesignChipBackground}" 
                             CornerRadius="10"
                             Grid.Row="1">
@@ -119,56 +131,26 @@
                                     <DataTemplate DataType="{x:Type mm:AdDetect}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="32"/>
+                                                <ColumnDefinition Width="70"/>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="32"/>
+                                                <ColumnDefinition Width="45"/>
                                             </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Margin="3"
-                                                Command="{Binding DataContext.EditDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                CommandParameter="{Binding}"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Center"
-                                                Style="{DynamicResource MaterialDesignIconButton}">
-                                                <TextBlock Text="E" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                            </Button>
-                                            <TextBlock Text="{Binding DisplayType}" 
-                                                   Grid.Column="1" 
-                                                   VerticalAlignment="Center"
-                                                   Margin="3"/>
-                                            <TextBlock Text="(" 
-                                                   Grid.Column="2" 
-                                                   VerticalAlignment="Center"
-                                                   Margin="3 3 0 3"/>
-                                            <TextBlock Text="{Binding DisplayValue}" 
-                                                   Grid.Column="3" 
-                                                   VerticalAlignment="Center"
-                                                   Margin="3"/>
-                                            <TextBlock Text=")" 
-                                                   Grid.Column="4" 
-                                                   VerticalAlignment="Center"
-                                                   Margin="0 3 3 3"/>
-                                            <Button Grid.Column="5"
-                                                Command="{Binding DataContext.RemoveDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                CommandParameter="{Binding}"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Center"
-                                                Margin="3"
-                                                Style="{DynamicResource MaterialDesignIconButton}">
-                                                <TextBlock Text="X" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            <ComboBox Margin="2" 
+                                                      ItemsSource="{Binding Types}"
+                                                      SelectedIndex="{Binding SelectedIndex}"/>
+                                            <TextBox Margin="2" Text="{Binding Value}" Grid.Column="1" MinWidth="100"/>
+                                            <Button Margin="2"
+                                                    Grid.Column="2"
+                                                    Style="{DynamicResource MaterialDesignFlatButton}"
+                                                    Command="{Binding DataContext.RemoveDetectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                    CommandParameter="{Binding}">
+                                                <TextBlock Text="X"/>
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
                         </Border>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
-                            <Button Margin="2" Cursor="Hand" Command="{Binding AddDetectCommand}">
-                                <TextBlock>Add</TextBlock>
-                            </Button>
-                        </StackPanel>
                     </Grid>
                 </GroupBox>
 
