@@ -141,6 +141,12 @@ namespace SmartClicker_WPF.ViewModels
         [RelayCommand]
         public async Task Start()
         {
+            if(true)
+            {
+                var proxy = _proxyList.Split("\r\n")[0];
+                MessageBox.Show((await _proxyService.CheckProxy(proxy, 5000)).ToString());
+                return;
+            }
             CheckBeforeStart();
             //_cancelTokenSource = new CancellationTokenSource();
             Tasker = new WebTasker(

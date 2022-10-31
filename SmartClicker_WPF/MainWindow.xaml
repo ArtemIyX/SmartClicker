@@ -183,7 +183,7 @@
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Visible" Margin="2"
-                                 Text="{Binding ProxyList}"/>
+                                 Text="{Binding ProxyList, UpdateSourceTrigger=PropertyChanged}"/>
                         </Border>
                         <StackPanel Grid.Row="3">
                             <TextBlock VerticalAlignment="Center" 
