@@ -9,7 +9,6 @@ namespace SmartClicker_WPF.Models
 {
     public enum WebProxyType
     {
-        Http,
         Https,
         Socks4,
         Socks5

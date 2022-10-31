@@ -27,8 +27,8 @@ namespace SmartClicker_WPF.Services
         {
             switch (webProxyType)
             {
-                case WebProxyType.Http:
-                    return SeleniumProxyAuthentication.ProxyProtocols.HTTP;
+                //case WebProxyType.Http:
+                //    return SeleniumProxyAuthentication.ProxyProtocols.HTTP;
                 case WebProxyType.Https:
                     return SeleniumProxyAuthentication.ProxyProtocols.HTTPS;
                 case WebProxyType.Socks4:
@@ -51,10 +51,10 @@ namespace SmartClicker_WPF.Services
                     res.HttpProxy = ip;
                     res.SslProxy = ip;
                     break;
-                case WebProxyType.Http:
+                /*case WebProxyType.Http:
                     res.HttpProxy = ip;
                     res.SslProxy = ip;
-                    break;
+                    break;*/
                 case WebProxyType.Socks4:
                     res.SocksProxy = ip;
                     res.SocksVersion = 4;
