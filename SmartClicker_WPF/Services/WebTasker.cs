@@ -7,6 +7,7 @@ using SmartClicker_WPF.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -32,8 +33,6 @@ namespace SmartClicker_WPF.Services
         private readonly string _keywords;
         private readonly string _driverPath;
         private readonly int _timeOut;
-        private CancellationToken _cancellationToken;
-        private Task _backgroundCheckTask;
 
         private Random _rand = new Random();
         private const int _minDelay = 250;
@@ -60,7 +59,7 @@ namespace SmartClicker_WPF.Services
         public int PageSearchTimeOutS { get; set; } = 5;
         public int MaxPageCount { get; set; } = 10;
 
-        public WebTasker(CancellationToken cancellationToken,
+        public WebTasker(
             WebService webService,
             InputService inputService,
             string site,
@@ -70,7 +69,6 @@ namespace SmartClicker_WPF.Services
             WebDriverType webDriverType,
             int loops)
         {
-            _cancellationToken = cancellationToken;
             _webService = webService;
             _inputService = inputService;
             _site = site;
@@ -83,7 +81,7 @@ namespace SmartClicker_WPF.Services
             _useProxy = false;
         }
 
-        public WebTasker(CancellationToken cancellationToken,
+        public WebTasker(
             WebService webService,
             InputService inputService,
             string site,
@@ -96,7 +94,7 @@ namespace SmartClicker_WPF.Services
             WebProxyType proxyType,
             string username,
             string password)
-            : this(cancellationToken, webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops)
+            : this(webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops)
         {
             _proxies = proxies;
             _proxyType = proxyType;
@@ -108,7 +106,6 @@ namespace SmartClicker_WPF.Services
         // Main function
         public async Task Run()
         {
-            _backgroundCheckTask = Task.Run(() => { BackgroundChecking(); });
 
             InitDriver(0);
 
@@ -138,9 +135,6 @@ namespace SmartClicker_WPF.Services
                 OnLog.Invoke("Time is up, looking for advertising..");
             }
         }
-
-
-        private void ClickOnBlankArea() => new Actions(_driver).MoveByOffset(0, 0).Click().Build().Perform();
 
         // Try find site by search result
         private async Task GoOnWebSite()
@@ -173,10 +167,7 @@ namespace SmartClicker_WPF.Services
             OnLog.Invoke($"Waiting for page {_pageIndex}...");
 
             // Wait until page is loaded
-            (IWebElement? nav_table, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, NavTableSearchTiemOutS, drv =>
-            {
-                return GoogleFinder.GetGooglePageTable(drv);
-            });
+            IWebElement? nav_table = await _driver.FindElementAsync(NavTableSearchTiemOutS, drv => GoogleFinder.GetGooglePageTable(drv));
 
             if (nav_table == null)
             {
@@ -190,82 +181,79 @@ namespace SmartClicker_WPF.Services
         }
 
         //Scroll to link and click
-        private async Task GoToSiteByLink(IWebElement link)
+        private async Task<bool> GoToSiteByLink(IWebElement link)
         {
             OnLog.Invoke($"Url found on page {_pageIndex}");
-            await ActivityMaker.ScrollTo(_driver, link, _minDelay, _maxDelay);
-            link.Click();
+            if (await _driver.ScrollTo(link, _minDelay, _maxDelay))
+            {
+                return link.ClickSave();
+            }
+            return false;
         }
 
         // Try go to next page 
-        private async Task OpenNextPage(IWebElement nav_table)
+        private async Task<bool> OpenNextPage(IWebElement nav_table)
         {
             _pageIndex++;
             if (_pageIndex > MaxPageCount)
             {
                 FinishWork($"We are already on the {_pageIndex} page and did not find {_site}");
-                return;
+                return false;
             }
 
-            (IWebElement? pageLink, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, PageSearchTimeOutS, drv =>
-            {
-                return GoogleFinder.GetGooglePageLink(nav_table, _pageIndex);
-            });
+            IWebElement? pageLink = await _driver.FindElementAsync(PageSearchTimeOutS, drv => GoogleFinder.GetGooglePageLink(nav_table, _pageIndex));
 
             if (pageLink == null)
             {
                 FinishWork($"Can not found page({_pageIndex}) link");
-                return;
+                return false;
             }
 
-            if (pageLink != null)
+            if (await _driver.ScrollTo(pageLink, _minDelay, _maxDelay))
             {
-                await ActivityMaker.ScrollTo(_driver, pageLink, _minDelay, _maxDelay);
+                return pageLink.ClickSave();
             }
-            pageLink?.Click();
-
+            return true;
         }
 
         // Main page - press "Find in google"
-        private async Task PressSearchingButton()
+        private async Task<bool> PressSearchingButton()
         {
             OnLog.Invoke("Looking for google search button...");
 
-            (IWebElement? searchButton, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, FindSearchButtonTimeOutS, drv =>
-            {
-                return GoogleFinder.GetMainGoogleSearchButton(drv);
-            });
+            IWebElement? searchButton = await _driver.FindElementAsync(FindSearchButtonTimeOutS, drv => GoogleFinder.GetMainGoogleSearchButton(drv));
             if (searchButton == null)
             {
                 FinishWork("Can not find google search button");
-                return;
+                return false;
             }
             OnLog.Invoke("Found google search button");
             await Task.Delay(randDelay());
-            searchButton?.Click();
+            return searchButton.ClickSave();
         }
 
         // Main page - type some query
-        private async Task TypeSearchingQeury(string query)
+        private async Task<bool> TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
-            (IWebElement? searchInput, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, FindSearchBarTimeOutS, drv =>
-            {
-                return GoogleFinder.GetMainGoogleSearchInput(drv);
-            });
+            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS, drv => GoogleFinder.GetMainGoogleSearchInput(drv));
 
             if (searchInput == null)
             {
                 FinishWork("Can not find google search input");
-                return;
+                return false;
             }
 
             OnLog.Invoke("Found google search input");
 
-            searchInput.Clear();
-            searchInput.SendKeys(query);
-            ClickOnBlankArea();
-            await Task.Delay(randDelay());
+            searchInput.SendKeysSave(query);
+            if (_driver.ClickOnBlankArea())
+            {
+                await Task.Delay(randDelay());
+                return true;
+            }
+            return false; 
+            
         }
 
         // Accept google cookies
@@ -273,10 +261,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
-            (IWebElement? cookieButton, Exception? ex) = await ActivityMaker.WaitUntilElementFoundSave(_driver, FindCookieButtonTimeOutS, drv =>
-            {
-                return GoogleFinder.GetAcceptCookieButton(drv);
-            });
+            IWebElement? cookieButton = await _driver.FindElementAsync(FindCookieButtonTimeOutS, drv => GoogleFinder.GetAcceptCookieButton(drv));
 
             if (cookieButton != null)
             {
@@ -326,29 +311,6 @@ namespace SmartClicker_WPF.Services
                 _driver.Quit();
                 _driver = null;
                 OnFinished.Invoke(reason);
-            }
-        }
-        private void CheckCancel()
-        {
-            if (_cancellationToken.IsCancellationRequested)
-            {
-                _cancellationToken.ThrowIfCancellationRequested();
-            }
-        }
-        private void BackgroundChecking()
-        {
-            while (true)
-            {
-                try
-                {
-                    CheckCancel();
-                    Task.Delay(CancelCheckDelayMs);
-                }
-                catch (Exception ex)
-                {
-                    FinishWork("Aborted");
-                    break;
-                }
             }
         }
 

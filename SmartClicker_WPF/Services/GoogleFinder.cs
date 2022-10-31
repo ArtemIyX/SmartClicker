@@ -1,5 +1,6 @@
 ﻿using MaterialDesignColors;
 using OpenQA.Selenium;
+using SmartClicker_WPF.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,9 +14,11 @@ namespace SmartClicker_WPF.Finders
     {
         public static IWebElement? GetAcceptCookieButton(IWebDriver driver)
         {
-            ReadOnlyCollection<IWebElement> elements = driver.FindElements(By.XPath("//*[@role='none']"));
-
+            ReadOnlyCollection<IWebElement>? elements = driver.FindElementsSave(By.XPath("//*[@role='none']"));
+            
             IWebElement? divWithRole = null;
+            if (elements == null)
+                return null;
             if (elements.Count == 0)
                 return null;
             else if (elements.Count == 1)
@@ -28,7 +31,9 @@ namespace SmartClicker_WPF.Finders
 
         public static IWebElement? GetMainGoogleSearchInput(IWebDriver driver)
         {
-            var elements = driver.FindElements(By.XPath("//*[@type='text']"));
+            ReadOnlyCollection<IWebElement>? elements = driver.FindElementsSave(By.XPath("//*[@type='text']"));
+            if (elements == null)
+                return null;
             foreach (var el in elements)
             {
                 if (el.GetAttribute("name") == "q"
@@ -39,17 +44,24 @@ namespace SmartClicker_WPF.Finders
                 }
             }
             return null;
+
         }
         public static IWebElement? GetMainGoogleSearchButton(IWebDriver driver)
         {
             //Search button have name 'btnK'
-            return driver.FindElements(By.Name("btnK")).Last();
+            ReadOnlyCollection<IWebElement>? elements = driver.FindElementsSave(By.Name("btnK"));
+            if (elements == null)
+                return null;
+            if (elements.Count == 0)
+                return null;
+            return elements.Last();
         }
 
         public static IWebElement? GetGooglePageLink(IWebElement table, int page)
         {
             //All links in table
-            ReadOnlyCollection<IWebElement> links = table.FindElements(By.TagName("a"));
+            ReadOnlyCollection<IWebElement>? links = table.FindElementsSave(By.TagName("a"));
+            if (links == null) return null;
             foreach (var link in links)
             {
                 //if(link.GetAttribute("class") == "f1")
@@ -82,7 +94,8 @@ namespace SmartClicker_WPF.Finders
             //Div with id 'rso' is div with results of searching
             IWebElement div_rso = driver.FindElement(By.Id("rso"));
             //Let's find all links
-            ReadOnlyCollection<IWebElement> links = div_rso.FindElements(By.TagName("a"));
+            ReadOnlyCollection<IWebElement>? links = div_rso.FindElementsSave(By.TagName("a"));
+            if (links == null) return null;
             foreach (var a in links)
             {
                 string href = a.GetAttribute("href");
@@ -101,9 +114,13 @@ namespace SmartClicker_WPF.Finders
         public static IWebElement? GetGooglePageTable(IWebDriver driver)
         {
             //Our table is located in div with id 'dotstuff'
-            IWebElement div_botstuff = driver.FindElement(By.Id("botstuff"));
+            IWebElement? div_botstuff = driver.FindElementSave(By.Id("botstuff"));
+            if (div_botstuff == null)
+                return null;
             //If page is not loaded there are no tables
-            ReadOnlyCollection<IWebElement> tables = div_botstuff.FindElements(By.TagName("table"));
+            ReadOnlyCollection<IWebElement>? tables = div_botstuff.FindElements(By.TagName("table"));
+            if (tables == null)
+                return null;
             if (tables.Count == 0)
                 return null;
             //Table must be one
