@@ -148,7 +148,7 @@ namespace SmartClicker_WPF.ViewModels
                 return;
             }
             CheckBeforeStart();
-            //_cancelTokenSource = new CancellationTokenSource();
+
             Tasker = new WebTasker(
                 _webService,
                 _inputService,
@@ -163,7 +163,6 @@ namespace SmartClicker_WPF.ViewModels
             Tasker.OnFinished += Tasker_OnFinished;
             Tasker.OnLog += Tasker_OnLog;
 
-            //_cancelTokenSource.CancelAfter(TimeOut * 6 * 1000);
             await Tasker.Run();
         }
 

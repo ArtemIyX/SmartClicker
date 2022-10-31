@@ -18,7 +18,7 @@ namespace SmartClicker_WPF.Services
 
     public class ProxyService
     {
-        private static string ProxyCheckApiUrl = @"https://www.google.com/";
+        private static string ProxyCheckApiUrl = @"http://ip-api.com/json/?fields=61439";
         public ICollection<WebProxyType> GetProxyTypes()
             => Enum.GetValues<WebProxyType>();
 
@@ -71,7 +71,6 @@ namespace SmartClicker_WPF.Services
                     return false;
                 }
             }
-            return false;
         }
 
         public async Task<bool> CheckProxy(string proxy, int timeOutMs)
