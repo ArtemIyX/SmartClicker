@@ -10,67 +10,66 @@ using System.Threading.Tasks;
 
 namespace ProxyList.ProxyTools
 {
-    public class ProxyChecker
+    public class ProxyService
     {
-        public List<string> Proxies { get; set; } = new List<string>();
-        public List<string> WorkingProxies { get; set; } = new List<string>();
-        public List<string> NonWorkingProxies { get; set; } = new List<string>();
+        private static string ProxyCheckApiUrl = @"http://ip-api.com/json/?fields=61439";
 
-        public Task? CheckingTask { get; private set; }
-        public int TotalChecked { get; private set; } = 0;
-
-        public event Action<string?, string?> OnCheckedWorking;
-        public event Action<string?, string?> OnCheckedDead;
-
-        public ProxyChecker()
+        private WebProxy CreateWebProxy(string ip, string port)
         {
-
-        }
-        public ProxyChecker(List<string> ProxiesToCheck)
-        {
-            Proxies = ProxiesToCheck;
+            return new WebProxy(ip, int.Parse(port));
         }
 
-        public Task Check()
+        private HttpClientHandler CreateProxyHandler(string ip, string port)
         {
-            if(Proxies.Count == 0)
+            return new HttpClientHandler()
             {
-                throw new Exception("No proxies to check");
-            }
-            WorkingProxies.Clear();
-            NonWorkingProxies.Clear();
+                Proxy = CreateWebProxy(ip, port)
+            };
+        }
 
-
-            CheckingTask = Task.Run(() =>
+        private HttpClientHandler CreateProxyHandler(string ip, string port,
+            string username, string password)
+        {
+            return new HttpClientHandler()
             {
-                for (int i = 0; i < Proxies.Count; i++)
+                Proxy = CreateWebProxy(ip, port),
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(username, password)
+            };
+        }
+        private async Task<bool> TrySendRequest(HttpClientHandler clientHandler, int timeOutMs)
+        {
+            using (var httpClient = new HttpClient(handler: clientHandler, disposeHandler: true)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeOutMs)
+            })
+            {
+                try
                 {
-                    string proxy = Proxies[i];
-
-                    TotalChecked = 0;
-                    string[] splitted = proxy.Split(':');
-                    string ip = splitted[0];
-                    string port = splitted[1];
-                    Ping ping = new Ping();
-                    PingReply reply = ping.Send(ip);
-
-                    JObject jobject = JObject.Parse(new WebClient().DownloadString("http://ip-api.com/json/" + ip));
-                    string? country = (string?)jobject["regionName"];
-
-                    if (reply.Status == IPStatus.Success)
-                    {
-                        WorkingProxies.Add(proxy);
-                        OnCheckedWorking.Invoke(proxy, country);
-                    }
-                    else
-                    {   
-                        NonWorkingProxies.Add(proxy);
-                        OnCheckedDead.Invoke(proxy, country);
-                    }
-                    TotalChecked++;
+                    var response = await httpClient.GetAsync(ProxyCheckApiUrl);
+                    return true;
                 }
-            });
-            return CheckingTask;
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        public async Task<bool> CheckProxy(string proxy, int timeOutMs)
+        {
+            var port_ip = proxy.Split(":");
+            var httpClientHandler = CreateProxyHandler(port_ip[0], port_ip[1]);
+            return await TrySendRequest(httpClientHandler, timeOutMs);
+
+        }
+
+        public async Task<bool> CheckProxy(string proxy, int timeOutMs, string username, string password)
+        {
+            var port_ip = proxy.Split(":");
+            var httpClientHandler = CreateProxyHandler(port_ip[0], port_ip[1], username, password);
+            return await TrySendRequest(httpClientHandler, timeOutMs);
+
         }
     }
 }

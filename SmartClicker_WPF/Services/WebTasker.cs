@@ -37,6 +37,7 @@ namespace SmartClicker_WPF.Services
 
         private WebDriver? _driver;
         private readonly int _loops;
+        private readonly ProxyService? _proxyService;
         private readonly ICollection<string> _proxies;
         private readonly ICollection<AdDetect> _adDetects;
         private readonly WebProxyType _proxyType;
@@ -57,30 +58,34 @@ namespace SmartClicker_WPF.Services
         private int randDelay() => _rand.Next(_minDelay, _maxDelay);
         private List<string> _keys = new List<string>();
         private int _pageIndex = 1;
+        private int _proxyIndex = 0;
 
         public event Action<string> OnFinished;
+        public event Action OnCompleted;
         public event Action<string> OnLog;
 
         public bool IsInProgress { get; private set; } = false;
-        public int CurrentIteration { get; private set; } = 1;
+        public int CurrentIteration { get; private set; } = 0;
         public WebTaskerState State { get; private set; } = WebTaskerState.None;
 
         //TODO: To struct
 
         //Find 'cookie button' on google.com
-        public int FindCookieButtonTimeOutS { get; set; } = 30;
+        public int FindCookieButtonTimeOutS { get; set; } = 10;
         //Find 'search bar' on google.com
-        public int FindSearchBarTimeOutS { get; set; } = 30;
+        public int FindSearchBarTimeOutS { get; set; } = 10;
         //Find 'search button' on google.com
-        public int FindSearchButtonTimeOutS { get; set; } = 30;
+        public int FindSearchButtonTimeOutS { get; set; } = 10;
         //Find site in Google search results
-        public int WebSiteSearchTimeOutS { get; set; } = 6;
+        public int WebSiteSearchTimeOutS { get; set; } = 10;
         //Find nav table in google.com/serach?q=
-        public int NavTableSearchTiemOutS { get; set; } = 5;
+        public int NavTableSearchTiemOutS { get; set; } = 10;
         //Find page in nav table
         public int PageSearchTimeOutS { get; set; } = 5;
         //Wait until page is loaded
         public int PageLoadTimeOutS { get; set; } = 60;
+        //Wait unti proxy send respond
+        public int ProxyCheckTimeOutMs { get; set; } = 5000;
         //Max page to find site
         public int MaxPageCount { get; set; } = 10;
 
@@ -119,12 +124,14 @@ namespace SmartClicker_WPF.Services
             WebDriverType webDriverType,
             int loops,
             ICollection<AdDetect> adDetects,
+            ProxyService proxyService,
             ICollection<string> proxies,
             WebProxyType proxyType,
             string? username = null,
             string? password = null)
             : this(webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops, adDetects)
         {
+            _proxyService = proxyService;
             _proxies = proxies;
             _proxyType = proxyType;
             _username = username;
@@ -132,19 +139,94 @@ namespace SmartClicker_WPF.Services
             _useProxy = true;
         }
 
+        //TODO: Check why dont work
         // Main function
         public async Task StartWork(CancellationToken cancellationToken)
         {
             if (IsInProgress)
                 throw new Exception("Already in progress");
+
+            _proxyIndex = 0;
+
+            for (int i = 0; i < _loops; ++i)
+            {
+                CurrentIteration = i;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Complete("Aborted");
+                    return;
+                }
+
+                await CheckProxyBeforeUsage(cancellationToken);
+                await DoCycle(cancellationToken);
+
+                if (_useProxy)
+                {
+                    IncreaseProxyIndex();
+                }
+            }
+
+            Complete("Completed");
+        }
+        private void Complete(string reason)
+        {
+            FinishWork(reason);
+            IsInProgress = false;
+            OnCompleted.Invoke();
+        }
+        private async Task CheckProxyBeforeUsage(CancellationToken cancellationToken)
+        {
+            if (!_useProxy)
+            {
+                return;
+            }
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                string proxy = _proxies.ElementAt(_proxyIndex);
+
+                bool working = false;
+                if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                {
+                    working = await _proxyService.CheckProxy(proxy, ProxyCheckTimeOutMs, _username, _password);
+                }
+                else
+                {
+                    working = await _proxyService.CheckProxy(proxy, ProxyCheckTimeOutMs);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                if (working)
+                {
+                    OnLog.Invoke($"Working with proxy {proxy}");
+                    return;
+                }
+                else
+                {
+                    OnLog.Invoke($"Proxy {proxy} don't work");
+                    IncreaseProxyIndex();
+                   /* if ( == 0)
+                    {
+                        throw new Exception("No working proxy");
+                    }*/
+                }
+            }
+
+        }
+
+        private async Task DoCycle(CancellationToken cancellationToken)
+        {
             try
             {
-                InitDriver(0);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InitDriver(_proxyIndex);
 
                 if (_driver == null)
                     throw new Exception("Driver has not been initialized");
 
                 IsInProgress = true;
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 _driver.Navigate().GoToUrl(GoogleURL);
                 _driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(PageLoadTimeOutS);
@@ -174,6 +256,40 @@ namespace SmartClicker_WPF.Services
                 FinishWork($"Error: {ex.Message}");
             }
         }
+
+        private int IncreaseProxyIndex()
+        {
+            _proxyIndex++;
+            if(_proxyIndex == _proxies.Count)
+            {
+                _proxyIndex = 0;
+            }
+            return _proxyIndex;
+        }
+
+        public void FinishWork(string reason)
+        {
+            try
+            {
+                if (_driver != null)
+                {
+                    _driver.Manage().Cookies.DeleteAllCookies();
+                    _driver.Quit();
+                    _driver.Dispose();
+                    _driver = null;
+                }
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                State = WebTaskerState.None;
+                OnFinished.Invoke(reason);
+            }
+        }
+
 
         private async Task<bool> GoToAdSite(int seconds, CancellationToken cancellationToken)
         {
@@ -416,7 +532,7 @@ namespace SmartClicker_WPF.Services
             }
         }
 
-        public void InitDriver(int index = 0)
+        public void InitDriver(int proxyIndex = 0)
         {
             if (_useProxy)
             {
@@ -426,7 +542,7 @@ namespace SmartClicker_WPF.Services
                     _driver = _webService.CreateWebDriverWithPrivateProxy(_driverPath,
                         _webDriverType,
                         _proxyType,
-                        _proxies.ElementAt(index),
+                        _proxies.ElementAt(proxyIndex),
                         _username,
                         _password);
                 }
@@ -435,37 +551,12 @@ namespace SmartClicker_WPF.Services
                     _driver = _webService.CreateWebDriverWithProxy(_driverPath,
                         _webDriverType,
                         _proxyType,
-                        _proxies.ElementAt(index));
+                        _proxies.ElementAt(proxyIndex));
                 }
             }
             else
             {
                 _driver = _webService.CreateWebDriver(_driverPath, _webDriverType);
-            }
-        }
-
-        public void FinishWork(string reason)
-        {
-            try
-            {
-                if (_driver != null)
-                {
-                    _driver.Manage().Cookies.DeleteAllCookies();
-                    _driver.Quit();
-                    _driver.Dispose();
-                    _driver = null;
-
-                }
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                IsInProgress = false;
-                State = WebTaskerState.None;
-                OnFinished.Invoke(reason);
             }
         }
 

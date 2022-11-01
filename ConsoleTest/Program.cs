@@ -20,6 +20,7 @@ public class Program
     private static WebDriver webDriver { get; set; } = null!;
     private static string driverPath { get; set; }
     private static string baseUrl { get; set; }
+
     public static void Main(string[] args)
     {
         driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";

@@ -156,27 +156,51 @@ namespace SmartClicker_WPF.ViewModels
             }
             CheckBeforeStart();
 
-            Tasker = new WebTasker(
-               _webService,
-               _inputService,
-               _siteUrl,
-               _keyWords,
-               GetDriverPath(),
-               _timeOut,
-               (WebDriverType)(Drivers.IndexOf(SelectedDriver)),
-               _loops,
-               _detects);
+            if (_useProxy)
+            {
+                var proxies = _proxyList.Split("\r\n");
+                Tasker = new WebTasker(
+                   _webService,
+                   _inputService,
+                   _siteUrl,
+                   _keyWords,
+                   GetDriverPath(),
+                   _timeOut,
+                   (WebDriverType)(Drivers.IndexOf(SelectedDriver)),
+                   _loops,
+                   _detects,
+                   _proxyService,
+                   proxies,
+                   (WebProxyType)(_selectedProxyTypeIndex),
+                   string.IsNullOrEmpty(_proxyUserName) ? null : _proxyUserName,
+                   string.IsNullOrEmpty(_proxyPassword) ? null : _proxyPassword);
+            }
+            else
+            {
+                Tasker = new WebTasker(
+                   _webService,
+                   _inputService,
+                   _siteUrl,
+                   _keyWords,
+                   GetDriverPath(),
+                   _timeOut,
+                   (WebDriverType)(Drivers.IndexOf(SelectedDriver)),
+                   _loops,
+                   _detects);
+            }
             Tasker.MaxPageCount = 20;
             Tasker.OnFinished += Tasker_OnFinished;
+            Tasker.OnCompleted += Tasker_OnCompleted;
             Tasker.OnLog += Tasker_OnLog;
 
             MainButtonTitle = CancelButtonLabel;
 
             _cancellationTokenSource = new CancellationTokenSource();
-
-            Tasker.StartWork(_cancellationTokenSource.Token);
+            CancellationToken ct = _cancellationTokenSource.Token;
+            Tasker.StartWork(ct);
             
         }
+
 
         private void CheckBeforeStart()
         {
@@ -207,8 +231,13 @@ namespace SmartClicker_WPF.ViewModels
 
         private void Tasker_OnFinished(string reason)
         {
-            MainButtonTitle = StartButtonLabel;
+            //MainButtonTitle = StartButtonLabel;
             AddLog($"Finished: {reason}" );
+        }
+
+        private void Tasker_OnCompleted()
+        {
+            MainButtonTitle = StartButtonLabel;
         }
 
         //TODO: To service
