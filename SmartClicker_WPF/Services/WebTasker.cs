@@ -7,6 +7,7 @@ using SmartClicker_WPF.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -66,6 +67,7 @@ namespace SmartClicker_WPF.Services
         public int PageLoadTimeOutS { get; set; } = 60;
         //Max page to find site
         public int MaxPageCount { get; set; } = 10;
+
 
         public WebTasker(
             WebService webService,
@@ -131,9 +133,12 @@ namespace SmartClicker_WPF.Services
             await PressSearchingButton();
             await GoOnWebSite();
             await DoSomeActivityFor(5);
-            await GoToAdSite(600);
-            await DoSomeActivityFor(_timeOut / 2);
+            if (await GoToAdSite(600))
+            {
+                await DoSomeActivityFor(_timeOut / 2);
+            }
         }
+        
 
         private async Task<bool> GoToAdSite(int seconds)
         {
@@ -141,11 +146,21 @@ namespace SmartClicker_WPF.Services
             ActivityMaker activityMaker = new ActivityMaker(_driver);
             try
             {
-                IWebElement adBanner = await activityMaker.FindAdBannerBy(seconds, _adDetects);
-                if (!await _driver.ScrollTo(adBanner))
+                (IWebElement iframe, IWebElement link) result = 
+                    await activityMaker.FindAdBannerBy(seconds, _adDetects);
+
+                _driver.SwitchTo().Frame(result.iframe);
+                if (!await _driver.ScrollTo(result.link))
                     return false;
                 OnLog.Invoke("Found ad banner");
-                return adBanner.ClickSave();
+
+                bool clicked = result.link.ClickSave();
+                if (clicked)
+                {
+                    _driver.SwitchTo().DefaultContent();
+                    return true;
+                }
+                return false;
             }
             catch
             {
@@ -200,7 +215,8 @@ namespace SmartClicker_WPF.Services
             OnLog.Invoke($"Waiting for page {_pageIndex}...");
 
             // Wait until page is loaded
-            IWebElement? nav_table = await _driver.FindElementAsync(NavTableSearchTiemOutS, drv => GoogleFinder.GetGooglePageTable(drv));
+            IWebElement? nav_table = await _driver.FindElementAsync(NavTableSearchTiemOutS,
+                drv => GoogleFinder.GetGooglePageTable(drv));
 
             if (nav_table == null)
             {
@@ -234,7 +250,8 @@ namespace SmartClicker_WPF.Services
                 return false;
             }
 
-            IWebElement? pageLink = await _driver.FindElementAsync(PageSearchTimeOutS, drv => GoogleFinder.GetGooglePageLink(nav_table, _pageIndex));
+            IWebElement? pageLink = await _driver.FindElementAsync(PageSearchTimeOutS, 
+                drv => GoogleFinder.GetGooglePageLink(nav_table, _pageIndex));
 
             if (pageLink == null)
             {
@@ -254,7 +271,8 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for google search button...");
 
-            IWebElement? searchButton = await _driver.FindElementAsync(FindSearchButtonTimeOutS, drv => GoogleFinder.GetMainGoogleSearchButton(drv));
+            IWebElement? searchButton = await _driver.FindElementAsync(FindSearchButtonTimeOutS, 
+                drv => GoogleFinder.GetMainGoogleSearchButton(drv));
             if (searchButton == null)
             {
                 FinishWork("Can not find google search button");
@@ -269,7 +287,8 @@ namespace SmartClicker_WPF.Services
         private async Task<bool> TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
-            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS, drv => GoogleFinder.GetMainGoogleSearchInput(drv));
+            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS, 
+                drv => GoogleFinder.GetMainGoogleSearchInput(drv));
 
             if (searchInput == null)
             {
@@ -294,7 +313,8 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
-            IWebElement? cookieButton = await _driver.FindElementAsync(FindCookieButtonTimeOutS, drv => GoogleFinder.GetAcceptCookieButton(drv));
+            IWebElement? cookieButton = await _driver.FindElementAsync(FindCookieButtonTimeOutS, 
+                drv => GoogleFinder.GetAcceptCookieButton(drv));
 
             if (cookieButton != null)
             {

@@ -77,8 +77,8 @@ namespace SmartClicker_WPF.Extensions
                 {
                     if (_cancellationToken.IsCancellationRequested)
                     {
-                        string text = $"Timed out after {_timeOut} seconds";
-                        throw new Exception(text);
+                        //string text = $"Timed out after {_timeOut} seconds";
+                        _cancellationToken.ThrowIfCancellationRequested();
                     }
                     IWebElement? element = _condition(_webDriver);
                     if(element != null)

@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Printing;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -31,8 +32,8 @@ namespace SmartClicker_WPF.Services
         public int LinkTimeouts { get; set; } = 10;
         public int AdTimeoutS { get; set; } = 10;
         public int DelayBettwenActivityMs { get; set; } = 500;
+        //Pop-up ad
         public string GoogleDismisButtonId { get; set; } = "dismiss-button";
-        public string GoogleAdDivId { get; set; } = "ad_position_box";
 
         static ActivityMaker()
         {
@@ -67,6 +68,34 @@ namespace SmartClicker_WPF.Services
             }
         }
 
+        private (IWebElement? frame, IWebElement? buttonDiv) CheckForPopUpAd()
+        {
+            ReadOnlyCollection<IWebElement>? iframes = _driver.FindElementsSave(By.TagName("iframe"));
+            foreach (var f in iframes)
+            {
+                _driver.SwitchTo().Frame(f);
+                IWebElement? dismisButton = _driver.FindElementSave(By.Id(GoogleDismisButtonId));
+                _driver.SwitchTo().DefaultContent();
+                if(dismisButton != null)
+                {
+                    return (frame: f, buttonDiv: dismisButton);
+                }
+            }
+            return (null, null);
+        }
+
+        private void TrySkipPopUp()
+        {
+            (IWebElement? frame, IWebElement? button) popUp = CheckForPopUpAd();
+            if (popUp.frame != null && popUp.button != null)
+            {
+                _driver.SwitchTo().Frame(popUp.frame);
+                popUp.button.ClickSave();
+                _driver.SwitchTo().DefaultContent();
+            }
+        }
+
+
         private async Task<bool> GoToRandomLink()
         {
             string currentUrl = _driver.Url;
@@ -74,6 +103,9 @@ namespace SmartClicker_WPF.Services
             while (i > 0)
             {
                 i--;
+
+                TrySkipPopUp();
+
                 // Pick random url
                 IWebElement? el = SiteFinder.GetRandomLink(_driver);
 
@@ -255,30 +287,20 @@ namespace SmartClicker_WPF.Services
                         if (string.IsNullOrEmpty(adDetect.Value))
                             return null;
 
-                        ReadOnlyCollection<IWebElement>? elements = drv.FindElementsSave(By.XPath("//*[@href]"));
+                        ReadOnlyCollection<IWebElement>? elements = drv.FindElementsSave(By.TagName("a"));
                         if (elements == null)
                             return null;
 
-                        string myHost = new Uri(drv.Url).Host;
-                        List<string> links = new List<string>();
-                        foreach (var el in elements)
+                        foreach(var link in elements)
                         {
-                            if (el == null)
-                                continue;
-                            string href = el.GetAttribute("href");
-                            if (string.IsNullOrEmpty(href))
-                                continue;
-
-                            links.Add(href);
-                            if (new Uri(href).Host != myHost)
+                            string href = link.GetAttribute("href");
+                            if (!string.IsNullOrEmpty(href))
                             {
-                                
                                 if (href.Contains(adDetect.Value))
                                 {
-                                    return el;
+                                    return link;
                                 }
                             }
-
                         }
                         return null;
                     };
@@ -293,32 +315,48 @@ namespace SmartClicker_WPF.Services
             return drv => drv.FindElementSave(By.TagName("a"));
         }
 
-        private async Task<IWebElement?> FindAd(AdDetect adDetect)
+        private async Task<(IWebElement? iframe, IWebElement? link)> FindAd(AdDetect adDetect)
         {
             try
             {
-                return await _driver.FindElementAsync(AdTimeoutS, GetAdCondition(adDetect));
+                ReadOnlyCollection<IWebElement>? iframes = _driver.FindElementsSave(By.TagName("iframe"));
+                if (iframes == null)
+                    return (null, null);
+                if (iframes.Count() == 0)
+                    return (null, null);
+                foreach(var iframe in iframes)
+                {
+                    _driver.SwitchTo().Frame(iframe);
+                    IWebElement? link = await _driver.FindElementAsync(AdTimeoutS, GetAdCondition(adDetect));
+                    _driver.SwitchTo().DefaultContent();
+                    if(link != null)
+                    {
+                        return (iframe, link);
+                    }
+                }
             }
             catch
             {
-                return null;
+                return (null, null);
             }
+            return (null, null);
         }
 
-        private async Task<IWebElement?> FindAd(ICollection<AdDetect> adDetects)
+        private async Task<(IWebElement? iframe, IWebElement? banner)> FindAd(ICollection<AdDetect> adDetects)
         {
             for (int i = 0; i < adDetects.Count; ++i)
             {
-                IWebElement? banner = await FindAd(adDetects.ElementAt(i));
-                if (banner != null)
+                (IWebElement? iframe, IWebElement? banner) result = await FindAd(adDetects.ElementAt(i));
+                if (result.iframe != null && result.banner != null)
                 {
-                    return banner;
+                    return result;
                 }
             }
-            return null;
+            return (null, null);
         }
 
-        public async Task<IWebElement> FindAdBannerBy(int seconds, ICollection<AdDetect> adDetects)
+        public async Task<(IWebElement iframe, IWebElement banner)> FindAdBannerBy(
+            int seconds, ICollection<AdDetect> adDetects)
         {
             if (adDetects == null)
                 throw new ArgumentNullException("adDetects");
@@ -327,16 +365,19 @@ namespace SmartClicker_WPF.Services
 
             _cancelTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancelTokenSource.Token;
-            _cancelTokenSource.CancelAfter(seconds * 1000);
+            _cancelTokenSource.CancelAfter(seconds * 1000); ;
 
             while (true)
             {
                 if (_cancellationToken.IsCancellationRequested)
                     _cancellationToken.ThrowIfCancellationRequested();
-                IWebElement? banner = await FindAd(adDetects);
-                if (banner != null)
+
+                TrySkipPopUp();
+
+                (IWebElement? iframe, IWebElement? banner) result = await FindAd(adDetects);
+                if (result.iframe != null && result.banner != null)
                 {
-                    return banner;
+                    return (result.iframe, result.banner);
                 }
                 await GoToRandomLink();
                 await Task.Delay(DelayBettwenActivityMs);
