@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using MaterialDesignThemes.Wpf;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
@@ -28,7 +29,44 @@ public class Program
         webDriver.Navigate().GoToUrl(baseUrl);
 
         Thread.Sleep(2500);
-        File.WriteAllText("PageSource.html", webDriver.PageSource);
+        //File.WriteAllText("PageSource.html", webDriver.PageSource);
+        var iframes = webDriver.FindElements(By.TagName("iframe"));
+        foreach (var iframe in iframes)
+        {
+            webDriver.SwitchTo().DefaultContent();
+            Console.WriteLine(iframe.TagName);
+            webDriver.SwitchTo().Frame(iframe);
+            var children = webDriver.FindElements(By.TagName("a"));
+            foreach(var child in children)
+            {
+                string href = child.GetAttribute("href");
+                if (!string.IsNullOrEmpty(href)) 
+                {
+                    Console.WriteLine("\t" + child.TagName + "href\t" + new Uri(href).Host);
+                    if (href.Contains("adclick"))
+                    {
+                        try
+                        {
+                            child.Click();
+                            Thread.Sleep(5000);
+                            break;
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+            }
+            /*
+            foreach (var child in children)
+            {
+                string tagName = child.TagName;
+                Console.WriteLine("\t" + tagName);
+                
+            }*/
+
+        }
         /* ReadOnlyCollection<IWebElement> links = webDriver.FindElements(By.TagName("a"));
          foreach(var el in links)
          {
@@ -85,6 +123,7 @@ public class Program
     {
         var proxy = new Proxy();
         var options = new ChromeOptions();
+        options.AddArguments("--disable-extensions");
         var driver = new ChromeDriver(driverPath, options, TimeSpan.FromSeconds(30));
         return driver;
     }
