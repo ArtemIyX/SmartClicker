@@ -185,7 +185,7 @@ namespace SmartClicker_WPF.ViewModels
         private void Tasker_OnFinished(string reason)
         {
             InProgress = false;
-            throw new Exception($"Task finished, reason: {reason}");
+            Logs.Add(new LogModel() { Log = $"Finished: {reason}" });
         }
 
         private string GetDriverPath()

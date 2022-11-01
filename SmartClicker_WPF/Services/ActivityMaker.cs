@@ -86,11 +86,22 @@ namespace SmartClicker_WPF.Services
 
         private void TrySkipPopUp()
         {
-            (IWebElement? frame, IWebElement? button) popUp = CheckForPopUpAd();
-            if (popUp.frame != null && popUp.button != null)
+            try
             {
-                _driver.SwitchTo().Frame(popUp.frame);
-                popUp.button.ClickSave();
+                (IWebElement? frame, IWebElement? button) popUp = CheckForPopUpAd();
+                if (popUp.frame != null && popUp.button != null)
+                {
+                    _driver.SwitchTo().Frame(popUp.frame);
+                    popUp.button.ClickSave();
+                    _driver.SwitchTo().DefaultContent();
+                }
+            }
+            catch
+            {
+
+            }
+            finally
+            {
                 _driver.SwitchTo().DefaultContent();
             }
         }
