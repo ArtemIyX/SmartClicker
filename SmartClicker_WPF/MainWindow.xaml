@@ -74,15 +74,18 @@
                             <TextBlock 
                                    Style="{DynamicResource MaterialDesignOverlineTextBlock}">Timeout</TextBlock>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox md:HintAssist.Hint="300" Width="50">
+                                <TextBox md:HintAssist.Hint="300 (sec)" Width="100">
                                     <Binding Path="TimeOut" UpdateSourceTrigger="PropertyChanged">
                                         <Binding.ValidationRules>
                                             <valids:NumericTextBoxValidation/>
                                         </Binding.ValidationRules>
                                     </Binding>
                                 </TextBox>
+                                <!--
                                 <TextBlock Text="Sec" Style="{DynamicResource MaterialDesignCharacterCounterTextBlock}"/>
+                                 -->
                             </StackPanel>
+
                         </StackPanel>
                         <StackPanel HorizontalAlignment="Left" Margin="5">
                             <TextBlock Text="Loops"
@@ -119,7 +122,7 @@
                                 <TextBlock Text="+"/>
                             </Button>
                         </Grid>
-                        
+
                         <Border Background="{DynamicResource MaterialDesignChipBackground}" 
                             CornerRadius="10"
                             Grid.Row="1">
@@ -138,8 +141,12 @@
                                             </Grid.ColumnDefinitions>
                                             <ComboBox Margin="2" 
                                                       ItemsSource="{Binding Types}"
-                                                      SelectedIndex="{Binding SelectedIndex}"/>
-                                            <TextBox Margin="2" Text="{Binding Value}" Grid.Column="1" MinWidth="100"/>
+                                                      SelectedIndex="{Binding SelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBox Margin="2" 
+                                                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                     Grid.Column="1"
+                                                     MinWidth="100"
+                                                     md:HintAssist.Hint="{Binding Hint, Mode=OneWay}"/>
                                             <Button Margin="2"
                                                     Grid.Column="2"
                                                     Style="{DynamicResource MaterialDesignFlatButton}"

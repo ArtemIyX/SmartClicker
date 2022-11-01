@@ -4,14 +4,20 @@ using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Support.UI;
 using SmartClicker_WPF.Extensions;
+using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Printing;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 namespace SmartClicker_WPF.Services
 {
@@ -22,7 +28,9 @@ namespace SmartClicker_WPF.Services
         private CancellationToken _cancellationToken;
         public static Random MakerRandom;
 
-        public int LinkTimeout { get; set; } = 10;
+        public int LinkTimeouts { get; set; } = 10;
+        public int AdTimeoutS { get; set; } = 10;
+        public int DelayBettwenActivityMs { get; set; } = 500;
         public string GoogleDismisButtonId { get; set; } = "dismiss-button";
         public string GoogleAdDivId { get; set; } = "ad_position_box";
 
@@ -55,7 +63,7 @@ namespace SmartClicker_WPF.Services
 
                 await GoToRandomLink();
 
-                await Task.Delay(500);
+                await Task.Delay(DelayBettwenActivityMs);
             }
         }
 
@@ -114,7 +122,7 @@ namespace SmartClicker_WPF.Services
 
         private async Task<bool> WaitUntilNewPageIsLoaded(string currentUrl)
         {
-            IWebElement? newElement = await _driver.FindElementAsync(LinkTimeout, drv =>
+            IWebElement? newElement = await _driver.FindElementAsync(LinkTimeouts, drv =>
             {
                 // Another url 
                 if (currentUrl == _driver.Url)
@@ -129,7 +137,6 @@ namespace SmartClicker_WPF.Services
             });
             return (newElement != null);
         }
-
 
         private async Task<bool> ScrollToRandomElement()
         {
@@ -174,6 +181,166 @@ namespace SmartClicker_WPF.Services
                 i--;
             }
             return null;
+        }
+
+        private static bool CheckXpath(string xpath)
+        {
+            try
+            {
+                XPathExpression.Compile(xpath);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static (bool suc, string? attr, string? value) CheckAttributeValue(string input)
+        {
+            Regex regex = new Regex("([^\"]*)=\\\"([^\"]*)\\\"");
+            MatchCollection matches = regex.Matches(input);
+            if (matches.Count > 0 && matches[0].Groups.Count > 1)
+            {
+                return (suc: true, attr: matches[0].Groups[0].Value, value: matches[0].Groups[1].Value);
+            }
+            return (suc: false, attr: null, value: null);
+        }
+
+        private static bool CheckIfAdIsCorrect(AdDetect adDetect)
+        {
+            if (string.IsNullOrEmpty(adDetect.Value))
+            {
+                return false;
+            }
+
+            switch (adDetect.Type)
+            {
+                case AdDetectType.AttributeValue:
+                    (bool suc, string? attr, string? value) check = CheckAttributeValue(adDetect.Value);
+                    return check.suc;
+                case AdDetectType.XPath:
+                    return CheckXpath(adDetect.Value);
+                default:
+                    return true;
+            }
+
+            return true;
+        }
+
+        private static Func<IWebDriver, IWebElement?> GetAdCondition(AdDetect adDetect)
+        {
+            if (!CheckIfAdIsCorrect(adDetect))
+            {
+                throw new ArgumentException("adDetect", "Incorrect format");
+            }
+            switch (adDetect.Type)
+            {
+                // Tag name (a/div/p)
+                case AdDetectType.TagName:
+                    return drv => drv.FindElementSave(By.TagName(adDetect.Value));
+                // //*[@href]
+                case AdDetectType.HasAttribute:
+                    return drv => drv.FindElementSave(By.XPath($"//*[@{adDetect.Value}]"));
+                // //*[@class="nav-links"]
+                case AdDetectType.AttributeValue:
+                    return drv => drv.FindElementSave(By.XPath($"//*[@{adDetect.Value}]"));
+                // //*[@class="someClass"]
+                case AdDetectType.HasClass:
+                    return drv => drv.FindElementSave(By.XPath($"//*[@class={adDetect.Value}"));
+                // TagName == a && href.contains(value)
+                case AdDetectType.ContainsUrl:
+                    return drv =>
+                    {
+                        if (string.IsNullOrEmpty(adDetect.Value))
+                            return null;
+
+                        ReadOnlyCollection<IWebElement>? elements = drv.FindElementsSave(By.XPath("//*[@href]"));
+                        if (elements == null)
+                            return null;
+
+                        string myHost = new Uri(drv.Url).Host;
+                        List<string> links = new List<string>();
+                        foreach (var el in elements)
+                        {
+                            if (el == null)
+                                continue;
+                            string href = el.GetAttribute("href");
+                            if (string.IsNullOrEmpty(href))
+                                continue;
+
+                            links.Add(href);
+                            if (new Uri(href).Host != myHost)
+                            {
+                                
+                                if (href.Contains(adDetect.Value))
+                                {
+                                    return el;
+                                }
+                            }
+
+                        }
+                        return null;
+                    };
+                // Custom CSS
+                case AdDetectType.CSS:
+                    return drv => drv.FindElementSave(By.CssSelector(adDetect.Value));
+                // Custom Xpath
+                case AdDetectType.XPath:
+                    return drv => drv.FindElementSave(By.TagName(adDetect.Value));
+            }
+            //Never call this
+            return drv => drv.FindElementSave(By.TagName("a"));
+        }
+
+        private async Task<IWebElement?> FindAd(AdDetect adDetect)
+        {
+            try
+            {
+                return await _driver.FindElementAsync(AdTimeoutS, GetAdCondition(adDetect));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<IWebElement?> FindAd(ICollection<AdDetect> adDetects)
+        {
+            for (int i = 0; i < adDetects.Count; ++i)
+            {
+                IWebElement? banner = await FindAd(adDetects.ElementAt(i));
+                if (banner != null)
+                {
+                    return banner;
+                }
+            }
+            return null;
+        }
+
+        public async Task<IWebElement> FindAdBannerBy(int seconds, ICollection<AdDetect> adDetects)
+        {
+            if (adDetects == null)
+                throw new ArgumentNullException("adDetects");
+            if (adDetects.Count == 0)
+                throw new ArgumentException("adDetets", "No detects");
+
+            _cancelTokenSource = new CancellationTokenSource();
+            _cancellationToken = _cancelTokenSource.Token;
+            _cancelTokenSource.CancelAfter(seconds * 1000);
+
+            while (true)
+            {
+                if (_cancellationToken.IsCancellationRequested)
+                    _cancellationToken.ThrowIfCancellationRequested();
+                IWebElement? banner = await FindAd(adDetects);
+                if (banner != null)
+                {
+                    return banner;
+                }
+                await GoToRandomLink();
+                await Task.Delay(DelayBettwenActivityMs);
+            }
         }
     }
 }

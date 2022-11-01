@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace SmartClicker_WPF.Services
         private WebDriver? _driver;
         private readonly int _loops;
         private readonly ICollection<string> _proxies;
+        private readonly ICollection<AdDetect> _adDetects;
         private readonly WebProxyType _proxyType;
         private readonly WebDriverType _webDriverType;
         private readonly string _username;
@@ -33,6 +35,7 @@ namespace SmartClicker_WPF.Services
         private readonly string _keywords;
         private readonly string _driverPath;
         private readonly int _timeOut;
+        
 
         private Random _rand = new Random();
         private const int _minDelay = 250;
@@ -47,16 +50,21 @@ namespace SmartClicker_WPF.Services
         //TODO: To struct
         //Every N ms will check if we need to end task
         public int CancelCheckDelayMs { get; set; } = 500;
-        //Find cookie button on google.com
+        //Find 'cookie button' on google.com
         public int FindCookieButtonTimeOutS { get; set; } = 30;
-        //Find search bar on google.com
+        //Find 'search bar' on google.com
         public int FindSearchBarTimeOutS { get; set; } = 30;
-        //Find search button on google.com
+        //Find 'search button' on google.com
         public int FindSearchButtonTimeOutS { get; set; } = 30;
-        //
+        //Find site in Google search results
         public int WebSiteSearchTimeOutS { get; set; } = 6;
+        //Find nav table in google.com/serach?q=
         public int NavTableSearchTiemOutS { get; set; } = 5;
+        //Find page in nav table
         public int PageSearchTimeOutS { get; set; } = 5;
+        //Wait until page is loaded
+        public int PageLoadTimeOutS { get; set; } = 60;
+        //Max page to find site
         public int MaxPageCount { get; set; } = 10;
 
         public WebTasker(
@@ -67,7 +75,8 @@ namespace SmartClicker_WPF.Services
             string driverPath,
             int timeOut,
             WebDriverType webDriverType,
-            int loops)
+            int loops,
+            ICollection<AdDetect> adDetects)
         {
             _webService = webService;
             _inputService = inputService;
@@ -78,6 +87,7 @@ namespace SmartClicker_WPF.Services
             _timeOut = timeOut;
             _webDriverType = webDriverType;
             _loops = loops;
+            _adDetects = adDetects;
             _useProxy = false;
         }
 
@@ -90,11 +100,12 @@ namespace SmartClicker_WPF.Services
             int timeOut,
             WebDriverType webDriverType,
             int loops,
+            ICollection<AdDetect> adDetects,
             ICollection<string> proxies,
             WebProxyType proxyType,
             string username,
             string password)
-            : this(webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops)
+            : this(webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops, adDetects)
         {
             _proxies = proxies;
             _proxyType = proxyType;
@@ -113,15 +124,37 @@ namespace SmartClicker_WPF.Services
                 throw new Exception("Driver has not been initialized");
 
             _driver.Navigate().GoToUrl(GoogleURL);
-            await AccepGoogleCookies();
+            _driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(PageLoadTimeOutS);
+            await AcceptGoogleCookies();
             string selectedKey = _keys.RandomElement();
             await TypeSearchingQeury(selectedKey);
             await PressSearchingButton();
             await GoOnWebSite();
-            await DoSomeActivityFor(_timeOut);
+            await DoSomeActivityFor(5);
+            await GoToAdSite(600);
+            await DoSomeActivityFor(_timeOut / 2);
         }
 
+        private async Task<bool> GoToAdSite(int seconds)
+        {
+            OnLog.Invoke($"Searching for ad in {_driver.Url} for {seconds}s...");
+            ActivityMaker activityMaker = new ActivityMaker(_driver);
+            try
+            {
+                IWebElement adBanner = await activityMaker.FindAdBannerBy(seconds, _adDetects);
+                if (!await _driver.ScrollTo(adBanner))
+                    return false;
+                OnLog.Invoke("Found ad banner");
+                return adBanner.ClickSave();
+            }
+            catch
+            {
+                OnLog.Invoke("Time is up, did not find ad banner");
+                return false;
+            }
+        }
 
+        // Do activity on site
         private async Task DoSomeActivityFor(int seconds)
         {
             OnLog.Invoke($"Doing some activity in {_driver.Url} for {seconds}s...");
@@ -257,7 +290,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Accept google cookies
-        private async Task AccepGoogleCookies()
+        private async Task AcceptGoogleCookies()
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
@@ -311,6 +344,7 @@ namespace SmartClicker_WPF.Services
                 {
                     _driver.Manage().Cookies.DeleteAllCookies();
                     _driver.Quit();
+                    _driver.Dispose();
                     _driver = null;
                     OnFinished.Invoke(reason);
                 }
