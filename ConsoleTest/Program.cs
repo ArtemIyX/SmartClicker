@@ -7,6 +7,7 @@ using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Internal;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -23,23 +24,18 @@ public class Program
         driverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32";
         baseUrl = @"https://101gardentools.com/";
         webDriver = GetChromeDriver();
+        webDriver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(30);
         webDriver.Navigate().GoToUrl(baseUrl);
-        /*
-         y = driver.execute_script("return document.querySelector('YOUR-CSS-SELECTOR').getBoundingClientRect()['y']")
-        for x in range(0, int(y), 100):
-            driver.execute_script("window.scrollTo(0, "+str(x)+");")
-         */
-        Thread.Sleep(2500);
-        WebElement el = (WebElement)webDriver.FindElement(By.ClassName("tagcloud"));
-        ILocatable locatable = (ILocatable)el;
-        ICoordinates viewPortLocation = locatable.Coordinates;
-        int x = viewPortLocation.LocationInViewport.X;
-        int y = viewPortLocation.LocationInViewport.Y;
-        Console.WriteLine($"C#: x:{x}, y:{y}");
-        IJavaScriptExecutor js = (IJavaScriptExecutor)webDriver;
-        double _y = (double)js.ExecuteScript("return document.querySelector('.tagcloud').getBoundingClientRect()['y']");
-        Console.WriteLine($"JS: {_y}");
 
+        Thread.Sleep(2500);
+        File.WriteAllText("PageSource.html", webDriver.PageSource);
+        /* ReadOnlyCollection<IWebElement> links = webDriver.FindElements(By.TagName("a"));
+         foreach(var el in links)
+         {
+             var href = el.GetAttribute("href");
+             Console.WriteLine($"a href=\t{href ?? "null"}");
+         }
+         Console.Read();*/
     }
 
     public static IWebElement GetGoogleSearchMainInput()
