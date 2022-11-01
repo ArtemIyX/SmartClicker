@@ -37,24 +37,19 @@ public class Program
             Console.WriteLine(iframe.TagName);
             webDriver.SwitchTo().Frame(iframe);
             var children = webDriver.FindElements(By.TagName("a"));
-            foreach(var child in children)
+            foreach (var child in children)
             {
                 string href = child.GetAttribute("href");
-                if (!string.IsNullOrEmpty(href)) 
+                if (!string.IsNullOrEmpty(href))
                 {
                     Console.WriteLine("\t" + child.TagName + "href\t" + new Uri(href).Host);
                     if (href.Contains("adclick"))
                     {
-                        try
-                        {
-                            child.Click();
-                            Thread.Sleep(5000);
-                            break;
-                        }
-                        catch
-                        {
 
-                        }
+                        child.Click();
+                        webDriver.SwitchTo().DefaultContent();
+                        Thread.Sleep(5000);
+
                     }
                 }
             }
