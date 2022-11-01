@@ -252,14 +252,21 @@
                     </ListBox>
                 </GroupBox>
 
-                <Button Grid.Row="1" 
-                        HorizontalAlignment="Right" 
+                <WrapPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button 
                         Margin="2" 
                         Cursor="Hand"
-                        Command="{Binding StartCommand}"
+                        Command="{Binding CancelCommand}"
                         IsEnabled="true">
-                    <TextBlock Text="{Binding MainButtonTitle}"/>
-                </Button>
+                        <TextBlock Text="Cancel"/>
+                    </Button>
+                    <Button 
+                        Margin="2" 
+                        Cursor="Hand"
+                        Command="{Binding StartCommand}">
+                        <TextBlock Text="Start"/>
+                    </Button>
+                </WrapPanel>
             </Grid>
         </Grid>
     </DockPanel>

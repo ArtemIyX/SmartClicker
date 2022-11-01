@@ -52,11 +52,7 @@ namespace SmartClicker_WPF.ViewModels
             Loops = 5;
             SiteUrl = @"101gardentools.com";
             KeyWords = "";
-            MainButtonTitle = "Start";
         }
-
-        [ObservableProperty]
-        private string _mainButtonTitle;
 
         [ObservableProperty]
         private bool _useProxy;
@@ -144,22 +140,30 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public void Start()
+        public void Cancel()
         {
-            if(Tasker != null)
+            if(Tasker == null || (Tasker != null && !Tasker.IsInProgress))
             {
-                if (Tasker.IsInProgress)
-                {
-                    _cancellationTokenSource?.Cancel();
-                    return;
-                }
+                throw new Exception("No process");
             }
+            if(_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanStart))]
+        public async Task Start()
+        {
             CheckBeforeStart();
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken ct = _cancellationTokenSource.Token;
 
             if (_useProxy)
             {
                 var proxies = _proxyList.Split("\r\n");
-                Tasker = new WebTasker(
+                Tasker = new WebTasker(ct,
                    _webService,
                    _inputService,
                    _siteUrl,
@@ -177,7 +181,7 @@ namespace SmartClicker_WPF.ViewModels
             }
             else
             {
-                Tasker = new WebTasker(
+                Tasker = new WebTasker(ct,
                    _webService,
                    _inputService,
                    _siteUrl,
@@ -193,14 +197,10 @@ namespace SmartClicker_WPF.ViewModels
             Tasker.OnCompleted += Tasker_OnCompleted;
             Tasker.OnLog += Tasker_OnLog;
 
-            MainButtonTitle = CancelButtonLabel;
-
-            _cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken ct = _cancellationTokenSource.Token;
-            Tasker.StartWork(ct);
+            await Tasker.StartWork();
             
         }
-
+        public bool CanStart() => Tasker == null || (Tasker != null && !Tasker.IsInProgress);
 
         private void CheckBeforeStart()
         {
@@ -237,7 +237,7 @@ namespace SmartClicker_WPF.ViewModels
 
         private void Tasker_OnCompleted()
         {
-            MainButtonTitle = StartButtonLabel;
+            _cancellationTokenSource = null;
         }
 
         //TODO: To service

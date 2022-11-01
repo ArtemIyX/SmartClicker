@@ -51,6 +51,7 @@ namespace SmartClicker_WPF.Services
         private readonly string _keywords;
         private readonly string _driverPath;
         private readonly int _timeOut;
+        private CancellationToken cancellationToken;
 
         private Random _rand = new Random();
         private const int _minDelay = 250;
@@ -91,6 +92,7 @@ namespace SmartClicker_WPF.Services
 
 
         public WebTasker(
+            CancellationToken cancellationToken,
             WebService webService,
             InputService inputService,
             string site,
@@ -101,6 +103,7 @@ namespace SmartClicker_WPF.Services
             int loops,
             ICollection<AdDetect> adDetects)
         {
+            this.cancellationToken = cancellationToken;
             _webService = webService;
             _inputService = inputService;
             _site = site;
@@ -115,6 +118,7 @@ namespace SmartClicker_WPF.Services
         }
 
         public WebTasker(
+            CancellationToken cancellationToken,
             WebService webService,
             InputService inputService,
             string site,
@@ -129,7 +133,7 @@ namespace SmartClicker_WPF.Services
             WebProxyType proxyType,
             string? username = null,
             string? password = null)
-            : this(webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops, adDetects)
+            : this(cancellationToken, webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops, adDetects)
         {
             _proxyService = proxyService;
             _proxies = proxies;
@@ -139,34 +143,51 @@ namespace SmartClicker_WPF.Services
             _useProxy = true;
         }
 
+        public void Begin()
+        {
+            Task.Run(async () =>
+            {
+                await StartWork();
+            });
+        }
+
         //TODO: Check why dont work
         // Main function
-        public async Task StartWork(CancellationToken cancellationToken)
+        public async Task StartWork()
         {
-            if (IsInProgress)
-                throw new Exception("Already in progress");
-
-            _proxyIndex = 0;
-
-            for (int i = 0; i < _loops; ++i)
+            
+            try
             {
-                CurrentIteration = i;
-                if (cancellationToken.IsCancellationRequested)
+                if (IsInProgress)
+                    throw new Exception("Already in progress");
+
+                IsInProgress = true;
+                _proxyIndex = 0;
+
+                for (int i = 0; i < _loops; ++i)
                 {
-                    Complete("Aborted");
-                    return;
+                    CurrentIteration = i;
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        Complete("Aborted");
+                        return;
+                    }
+
+                    await CheckProxyBeforeUsage();
+                    await DoCycle();
+
+                    if (_useProxy)
+                    {
+                        IncreaseProxyIndex();
+                    }
                 }
 
-                await CheckProxyBeforeUsage(cancellationToken);
-                await DoCycle(cancellationToken);
-
-                if (_useProxy)
-                {
-                    IncreaseProxyIndex();
-                }
+                Complete("Completed");
             }
-
-            Complete("Completed");
+            catch(Exception ex)
+            {
+                Complete(ex.Message);
+            }
         }
         private void Complete(string reason)
         {
@@ -174,7 +195,7 @@ namespace SmartClicker_WPF.Services
             IsInProgress = false;
             OnCompleted.Invoke();
         }
-        private async Task CheckProxyBeforeUsage(CancellationToken cancellationToken)
+        private async Task CheckProxyBeforeUsage()
         {
             if (!_useProxy)
             {
@@ -213,7 +234,7 @@ namespace SmartClicker_WPF.Services
 
         }
 
-        private async Task DoCycle(CancellationToken cancellationToken)
+        private async Task DoCycle()
         {
             try
             {
@@ -224,28 +245,26 @@ namespace SmartClicker_WPF.Services
                 if (_driver == null)
                     throw new Exception("Driver has not been initialized");
 
-                IsInProgress = true;
-
                 cancellationToken.ThrowIfCancellationRequested();
 
                 _driver.Navigate().GoToUrl(GoogleURL);
                 _driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(PageLoadTimeOutS);
 
-                await TryAcceptGoogleCookies(cancellationToken);
+                await TryAcceptGoogleCookies();
 
-                await TypeSearchingQeury(_keys.RandomElement(), cancellationToken);
-                await PressSearchingButton(cancellationToken);
+                await TypeSearchingQeury(_keys.RandomElement());
+                await PressSearchingButton();
 
-                IWebElement link = await FindWebsiteLink(cancellationToken);
-                await GoToSiteByLink(link, cancellationToken);
+                IWebElement link = await FindWebsiteLink();
+                await GoToSiteByLink(link);
 
                 State = WebTaskerState.DoingActivityOnSite;
-                await DoSomeActivityFor(_timeOut, cancellationToken);
+                await DoSomeActivityFor(_timeOut);
 
-                if (await GoToAdSite(_timeOut, cancellationToken))
+                if (await GoToAdSite(_timeOut))
                 {
                     State = WebTaskerState.DoingActivityOnAdSite;
-                    await DoSomeActivityFor(_timeOut / 2, cancellationToken);
+                    await DoSomeActivityFor(_timeOut / 2);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -291,7 +310,7 @@ namespace SmartClicker_WPF.Services
         }
 
 
-        private async Task<bool> GoToAdSite(int seconds, CancellationToken cancellationToken)
+        private async Task<bool> GoToAdSite(int seconds)
         {
             State = WebTaskerState.SearchingForAdBanner;
 
@@ -299,18 +318,22 @@ namespace SmartClicker_WPF.Services
             int i = 5;
             while (i > 0)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     ActivityMaker activityMaker = new ActivityMaker(_driver);
                     (IWebElement iframe, IWebElement link) result =
                         await activityMaker.FindAdBannerBy(seconds, _adDetects);
 
+                    cancellationToken.ThrowIfCancellationRequested();
                     OnLog.Invoke("Found ad banner");
                     _driver.SwitchTo().Frame(result.iframe);
                     if (!await _driver.ScrollTo(result.link))
                     {
                         OnLog.Invoke("Can not scroll to link, but trying to click");
                     }
+
+                    cancellationToken.ThrowIfCancellationRequested();
 
                     bool clicked = result.link.ClickSave();
                     _driver.SwitchTo().DefaultContent();
@@ -338,7 +361,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Do activity on site
-        private async Task DoSomeActivityFor(int seconds, CancellationToken cancellationToken)
+        private async Task DoSomeActivityFor(int seconds)
         {
             OnLog.Invoke($"Doing some activity in {_driver.Url} for {seconds}s...");
             ActivityMaker activityMaker = new ActivityMaker(_driver);
@@ -353,7 +376,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Try find site by search result
-        private async Task<IWebElement> FindWebsiteLink(CancellationToken cancellationToken)
+        private async Task<IWebElement> FindWebsiteLink()
         {
             State = WebTaskerState.SearchingForWebSite;
 
@@ -363,7 +386,7 @@ namespace SmartClicker_WPF.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var (s1, nav_table) = await GetNavTable(cancellationToken);
+                var (s1, nav_table) = await GetNavTable();
                 if (!s1)
                 {
                     throw new Exception("Can not find google nav-bar");
@@ -391,7 +414,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Get navigation table of google (bottom numbers)
-        private async Task<(bool, IWebElement?)> GetNavTable(CancellationToken cancellationToken)
+        private async Task<(bool, IWebElement?)> GetNavTable()
         {
             OnLog.Invoke($"Waiting for page {_pageIndex}...");
 
@@ -411,7 +434,7 @@ namespace SmartClicker_WPF.Services
         }
 
         //Scroll to link and click
-        private async Task GoToSiteByLink(IWebElement link, CancellationToken cancellationToken)
+        private async Task GoToSiteByLink(IWebElement link)
         {
             cancellationToken.ThrowIfCancellationRequested();
             OnLog.Invoke($"Url found on page {_pageIndex}");
@@ -451,7 +474,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Main page - press "Find in google"
-        private async Task PressSearchingButton(CancellationToken cancellationToken)
+        private async Task PressSearchingButton()
         {
             State = WebTaskerState.PressingSearchingButton;
 
@@ -478,7 +501,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Main page - type some query
-        private async Task TypeSearchingQeury(string query, CancellationToken cancellationToken)
+        private async Task TypeSearchingQeury(string query)
         {
             State = WebTaskerState.TypingSearchRequest;
 
@@ -506,7 +529,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Accept google cookies
-        private async Task TryAcceptGoogleCookies(CancellationToken cancellationToken)
+        private async Task TryAcceptGoogleCookies()
         {
             State = WebTaskerState.AcceptingGoogleCookie;
 
