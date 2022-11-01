@@ -34,6 +34,7 @@ namespace SmartClicker_WPF
         {
             var errorBox = new ErrorBox("Error", e.Exception.Message);
             SystemSounds.Hand.Play();
+            errorBox.Topmost = true;
             errorBox.ShowDialog();
             e.Handled = true;
         }

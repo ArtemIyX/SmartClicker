@@ -26,7 +26,11 @@ namespace SmartClicker_WPF.ViewModels
         private ProxyService _proxyService;
         private WebService _webService;
         private InputService _inputService;
+        private CancellationTokenSource? _cancellationTokenSource;
         public WebTasker Tasker { get; private set; }
+
+        private static string StartButtonLabel = "Start";
+        private static string CancelButtonLabel = "Cancel";
 
         public MainVM(WebService WebService, InputService inputService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
         {
@@ -48,13 +52,11 @@ namespace SmartClicker_WPF.ViewModels
             Loops = 5;
             SiteUrl = @"101gardentools.com";
             KeyWords = "";
-            InProgress = false;
+            MainButtonTitle = "Start";
         }
 
-        public bool IsStartButtonEnabled => !InProgress;
-
         [ObservableProperty]
-        private bool _inProgress;
+        private string _mainButtonTitle;
 
         [ObservableProperty]
         private bool _useProxy;
@@ -142,26 +144,38 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public async Task Start()
+        public void Start()
         {
+            if(Tasker != null)
+            {
+                if (Tasker.IsInProgress)
+                {
+                    _cancellationTokenSource?.Cancel();
+                    return;
+                }
+            }
             CheckBeforeStart();
 
             Tasker = new WebTasker(
-                _webService,
-                _inputService,
-                _siteUrl, 
-                _keyWords, 
-                GetDriverPath(), 
-                _timeOut, 
-                (WebDriverType)(Drivers.IndexOf(SelectedDriver)), 
-                _loops,
-                _detects);
+               _webService,
+               _inputService,
+               _siteUrl,
+               _keyWords,
+               GetDriverPath(),
+               _timeOut,
+               (WebDriverType)(Drivers.IndexOf(SelectedDriver)),
+               _loops,
+               _detects);
             Tasker.MaxPageCount = 20;
-            InProgress = true;
             Tasker.OnFinished += Tasker_OnFinished;
             Tasker.OnLog += Tasker_OnLog;
 
-            await Tasker.StartWork();
+            MainButtonTitle = CancelButtonLabel;
+
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            Tasker.StartWork(_cancellationTokenSource.Token);
+            
         }
 
         private void CheckBeforeStart()
@@ -193,7 +207,7 @@ namespace SmartClicker_WPF.ViewModels
 
         private void Tasker_OnFinished(string reason)
         {
-            InProgress = false;
+            MainButtonTitle = StartButtonLabel;
             AddLog($"Finished: {reason}" );
         }
 

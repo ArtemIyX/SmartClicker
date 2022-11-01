@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.Extensions
@@ -40,7 +41,13 @@ namespace SmartClicker_WPF.Extensions
 
         public static async Task<IWebElement?> FindElementAsync(this IWebDriver webDriver, int timeOutS, Func<IWebDriver, IWebElement?> condition)
         {
-            return await new Waiter(webDriver, timeOutS, condition).Wait();
+            return await new Waiter(webDriver, timeOutS, condition).Wait(CancellationToken.None);
+        }
+
+        public static async Task<IWebElement?> FindElementAsync(this IWebDriver webDriver, int timeOutS, Func<IWebDriver, IWebElement?> condition,
+            CancellationToken cancellationToken)
+        {
+            return await new Waiter(webDriver, timeOutS, condition).Wait(cancellationToken);
         }
 
         public static async Task<bool> ScrollToSlow(this IWebDriver webDriver, IWebElement webElement, int speed = 100, int minDelay = 250, int maxDelay = 1000)

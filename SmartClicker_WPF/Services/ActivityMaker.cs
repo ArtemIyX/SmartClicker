@@ -46,7 +46,7 @@ namespace SmartClicker_WPF.Services
         }
 
 
-        public async Task DoActivityFor(int seconds)
+        public async Task DoActivityFor(int seconds, CancellationToken cancellationToken)
         {
             _cancelTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancelTokenSource.Token;

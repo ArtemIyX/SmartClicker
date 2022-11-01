@@ -27,7 +27,7 @@ namespace SmartClicker_WPF.Extensions
             _condition = condition;
         }
 
-        public async Task<IWebElement?> Wait()
+        public async Task<IWebElement?> Wait(CancellationToken ct)
         {
             //Check if already in proccess
             if (_task != null)
@@ -57,7 +57,10 @@ namespace SmartClicker_WPF.Extensions
                 _task = Task<IWebElement>.Run(() =>
                 {
                     while (true)
-                    { 
+                    {
+                        //Main cancel
+                        ct.ThrowIfCancellationRequested();
+                        //Time out cancel
                         _cancellationToken.ThrowIfCancellationRequested();
                         IWebElement? element = _condition(_webDriver);
                         if (element != null)

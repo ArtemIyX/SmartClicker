@@ -257,8 +257,8 @@
                         Margin="2" 
                         Cursor="Hand"
                         Command="{Binding StartCommand}"
-                        IsEnabled="{Binding IsStartButtonEnabled}">
-                    <TextBlock Text="Start"/>
+                        IsEnabled="true">
+                    <TextBlock Text="{Binding MainButtonTitle}"/>
                 </Button>
             </Grid>
         </Grid>
