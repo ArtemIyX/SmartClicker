@@ -27,8 +27,8 @@ namespace SmartClicker_WPF.Services
         private readonly ICollection<AdDetect> _adDetects;
         private readonly WebProxyType _proxyType;
         private readonly WebDriverType _webDriverType;
-        private readonly string _username;
-        private readonly string _password;
+        private string? _username;
+        private string? _password;
         private readonly bool _useProxy;
         private readonly WebService _webService;
         private readonly InputService _inputService;
@@ -36,7 +36,7 @@ namespace SmartClicker_WPF.Services
         private readonly string _keywords;
         private readonly string _driverPath;
         private readonly int _timeOut;
-        
+
 
         private Random _rand = new Random();
         private const int _minDelay = 250;
@@ -49,8 +49,7 @@ namespace SmartClicker_WPF.Services
         public event Action<string> OnLog;
 
         //TODO: To struct
-        //Every N ms will check if we need to end task
-        public int CancelCheckDelayMs { get; set; } = 500;
+
         //Find 'cookie button' on google.com
         public int FindCookieButtonTimeOutS { get; set; } = 30;
         //Find 'search bar' on google.com
@@ -105,8 +104,8 @@ namespace SmartClicker_WPF.Services
             ICollection<AdDetect> adDetects,
             ICollection<string> proxies,
             WebProxyType proxyType,
-            string username,
-            string password)
+            string? username = null,
+            string? password = null)
             : this(webService, inputService, site, keywords, driverPath, timeOut, webDriverType, loops, adDetects)
         {
             _proxies = proxies;
@@ -117,7 +116,7 @@ namespace SmartClicker_WPF.Services
         }
 
         // Main function
-        public async Task Run()
+        public async Task StartWork()
         {
             try
             {
@@ -145,40 +144,57 @@ namespace SmartClicker_WPF.Services
 
                 FinishWork("Succes");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 FinishWork($"Error: {ex.Message}");
             }
         }
-        
+
 
         private async Task<bool> GoToAdSite(int seconds)
         {
             OnLog.Invoke($"Searching for ad in {_driver.Url} for {seconds}s...");
-            ActivityMaker activityMaker = new ActivityMaker(_driver);
-            try
+
+
+            int i = 5;
+            while (i > 0)
             {
-                (IWebElement iframe, IWebElement link) result = 
-                    await activityMaker.FindAdBannerBy(seconds, _adDetects);
-
-                _driver.SwitchTo().Frame(result.iframe);
-                if (!await _driver.ScrollTo(result.link))
-                    return false;
-                OnLog.Invoke("Found ad banner");
-
-                bool clicked = result.link.ClickSave();
-                if (clicked)
+                try
                 {
+                    ActivityMaker activityMaker = new ActivityMaker(_driver);
+                    (IWebElement iframe, IWebElement link) result =
+                        await activityMaker.FindAdBannerBy(seconds, _adDetects);
+
+                    OnLog.Invoke("Found ad banner");
+                    _driver.SwitchTo().Frame(result.iframe);
+                    if (!await _driver.ScrollTo(result.link))
+                    {
+                        OnLog.Invoke("Can not scroll to link, but trying to click");
+                    }
+                  
+                    bool clicked = result.link.ClickSave();
                     _driver.SwitchTo().DefaultContent();
-                    return true;
+                    if (clicked)
+                    {
+                        OnLog.Invoke("Clicked on banner");
+                        await Task.Delay(randDelay());
+                        return true;
+                    }
+                    else
+                    {
+                        OnLog.Invoke($"Can not click on link (ad banner) ({5 - i}/5)");
+                    }
                 }
-                return false;
+                catch
+                {
+                    OnLog.Invoke("Time is up, did not find ad banner");
+                }
+
+                i--;
             }
-            catch
-            {
-                OnLog.Invoke("Time is up, did not find ad banner");
-                return false;
-            }
+
+            OnLog.Invoke("After 5 attempts couldn't click on banner");
+            return false;
         }
 
         // Do activity on site
@@ -259,6 +275,7 @@ namespace SmartClicker_WPF.Services
                 throw new Exception("Can not click on site url");
             }
             OnLog.Invoke("Going to site..");
+            await Task.Delay(randDelay());
         }
 
         // Try go to next page 
@@ -266,12 +283,12 @@ namespace SmartClicker_WPF.Services
         {
             _pageIndex++;
 
-            IWebElement? pageLink = await _driver.FindElementAsync(PageSearchTimeOutS, 
+            IWebElement? pageLink = await _driver.FindElementAsync(PageSearchTimeOutS,
                 drv => GoogleFinder.GetGooglePageLink(nav_table, _pageIndex));
 
             if (pageLink == null)
             {
-                
+
                 return false;
             }
 
@@ -287,7 +304,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for google search button...");
 
-            IWebElement? searchButton = await _driver.FindElementAsync(FindSearchButtonTimeOutS, 
+            IWebElement? searchButton = await _driver.FindElementAsync(FindSearchButtonTimeOutS,
                 drv => GoogleFinder.GetMainGoogleSearchButton(drv));
             if (searchButton == null)
             {
@@ -306,7 +323,7 @@ namespace SmartClicker_WPF.Services
         private async Task TypeSearchingQeury(string query)
         {
             OnLog.Invoke("Looking for google search input...");
-            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS, 
+            IWebElement? searchInput = await _driver.FindElementAsync(FindSearchBarTimeOutS,
                 drv => GoogleFinder.GetMainGoogleSearchInput(drv));
 
             if (searchInput == null)
@@ -332,7 +349,7 @@ namespace SmartClicker_WPF.Services
         {
             OnLog.Invoke("Looking for cookies button...");
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, FindCookieButtonTimeOutS));
-            IWebElement? cookieButton = await _driver.FindElementAsync(FindCookieButtonTimeOutS, 
+            IWebElement? cookieButton = await _driver.FindElementAsync(FindCookieButtonTimeOutS,
                 drv => GoogleFinder.GetAcceptCookieButton(drv));
 
             if (cookieButton != null)

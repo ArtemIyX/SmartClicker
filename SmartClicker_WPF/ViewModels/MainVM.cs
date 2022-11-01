@@ -101,6 +101,9 @@ namespace SmartClicker_WPF.ViewModels
         [ObservableProperty]
         private ObservableCollection<LogModel> _logs;
 
+        [ObservableProperty]
+        private int _selectedLogIndex;
+
         [RelayCommand]
         public void RemoveDetect(object sender)
         {
@@ -158,7 +161,7 @@ namespace SmartClicker_WPF.ViewModels
             Tasker.OnFinished += Tasker_OnFinished;
             Tasker.OnLog += Tasker_OnLog;
 
-            await Tasker.Run();
+            await Tasker.StartWork();
         }
 
         private void CheckBeforeStart()
@@ -174,20 +177,27 @@ namespace SmartClicker_WPF.ViewModels
             if (SelectedDriver == null) 
                 throw new Exception("Selected driver is null");
             if (Detects.Count <= 0) 
-                throw new Exception("Ad detection not configured");
+                throw new Exception("Ad filter not configured");
+        }
+
+        private void AddLog(string text)
+        {
+            Logs.Add(new LogModel() { Log = text });
+            SelectedLogIndex = (Logs.Count - 1);
         }
 
         private void Tasker_OnLog(string log)
         {
-            Logs.Add(new LogModel() { Log = $"{_selectedDriver.Title} driver: {log}" });
+            AddLog($"{_selectedDriver.Title} driver: {log}");
         }
 
         private void Tasker_OnFinished(string reason)
         {
             InProgress = false;
-            Logs.Add(new LogModel() { Log = $"Finished: {reason}" });
+            AddLog($"Finished: {reason}" );
         }
 
+        //TODO: To service
         private string GetDriverPath()
         {
             string fullPath = _selectedDriver.Path ?? "";

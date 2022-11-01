@@ -30,7 +30,7 @@ namespace SmartClicker_WPF.Services
         public static Random MakerRandom;
 
         public int LinkTimeouts { get; set; } = 10;
-        public int AdTimeoutS { get; set; } = 10;
+        public int AdTimeoutS { get; set; } = 2;
         public int DelayBettwenActivityMs { get; set; } = 500;
         //Pop-up ad
         public string GoogleDismisButtonId { get; set; } = "dismiss-button";
@@ -301,7 +301,7 @@ namespace SmartClicker_WPF.Services
                         ReadOnlyCollection<IWebElement>? elements = drv.FindElementsSave(By.TagName("a"));
                         if (elements == null)
                             return null;
-
+                        List<IWebElement> resultElements = new List<IWebElement>();
                         foreach(var link in elements)
                         {
                             string href = link.GetAttribute("href");
@@ -309,11 +309,15 @@ namespace SmartClicker_WPF.Services
                             {
                                 if (href.Contains(adDetect.Value))
                                 {
-                                    return link;
+                                    resultElements.Add(link);
                                 }
                             }
                         }
-                        return null;
+                        if (resultElements.Count == 0)
+                        {
+                            return null;
+                        }
+                        return resultElements.RandomElement();
                     };
                 // Custom CSS
                 case AdDetectType.CSS:
@@ -335,12 +339,16 @@ namespace SmartClicker_WPF.Services
                     return (null, null);
                 if (iframes.Count() == 0)
                     return (null, null);
-                foreach(var iframe in iframes)
+
+                int n = iframes.Count(); 
+                while(n > 0)
                 {
+                    n--;
+                    var iframe = iframes.RandomElement();
                     _driver.SwitchTo().Frame(iframe);
                     IWebElement? link = await _driver.FindElementAsync(AdTimeoutS, GetAdCondition(adDetect));
                     _driver.SwitchTo().DefaultContent();
-                    if(link != null)
+                    if (link != null)
                     {
                         return (iframe, link);
                     }

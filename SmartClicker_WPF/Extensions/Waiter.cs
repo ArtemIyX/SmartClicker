@@ -30,12 +30,17 @@ namespace SmartClicker_WPF.Extensions
         public async Task<IWebElement?> Wait()
         {
             //Check if already in proccess
-            if(_task != null)
+            if (_task != null)
             {
-                if(_task.Status == TaskStatus.Running)
+                if (_task.Status == TaskStatus.Running)
                 {
                     throw new Exception("Already in the process of waiting");
                 }
+            }
+
+            if (_condition == null)
+            {
+                throw new ArgumentNullException("condition", "condition cannot be null");
             }
 
             //Init cancelation
@@ -44,51 +49,38 @@ namespace SmartClicker_WPF.Extensions
             //Cancel after timeout
             _cancellationTokenSource.CancelAfter(_timeOut * 1000);
             //Run finding task
-            _task = RunMe();
 
-            IWebElement? el;
             //If all ok element will be found element
+            IWebElement? el;
             try
             {
+                _task = Task<IWebElement>.Run(() =>
+                {
+                    while (true)
+                    { 
+                        _cancellationToken.ThrowIfCancellationRequested();
+                        IWebElement? element = _condition(_webDriver);
+                        if (element != null)
+                        {
+                            return element;
+                        }
+                        Task.Delay(SleepingDelayMs);
+                    }
+                });
                 el = await _task;
             }
             //But if it is error (time out exception for example)
             //Element will be null
-            catch 
+            catch
             {
                 el = null;
             }
             //Clear data
-            _task = null;
+
             _cancellationTokenSource = null;
             //Return result
             return el;
         }
 
-        private Task<IWebElement> RunMe()
-        {
-            return Task.Run(() =>
-            {
-                if (_condition == null)
-                {
-                    throw new ArgumentNullException("condition", "condition cannot be null");
-                }
-                while (true)
-                {
-                    if (_cancellationToken.IsCancellationRequested)
-                    {
-                        //string text = $"Timed out after {_timeOut} seconds";
-                        _cancellationToken.ThrowIfCancellationRequested();
-                    }
-                    IWebElement? element = _condition(_webDriver);
-                    if(element != null)
-                    {
-                        return element;
-                    }
-                    Task.Delay(SleepingDelayMs);
-                }
-            });
-            
-        }
     }
 }
