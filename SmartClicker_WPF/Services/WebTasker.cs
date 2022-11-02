@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using CommunityToolkit.Mvvm.ComponentModel.__Internals;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using SmartClicker_WPF.Extensions;
@@ -45,6 +46,7 @@ namespace SmartClicker_WPF.Services
         private string? _username;
         private string? _password;
         private readonly bool _useProxy;
+        private readonly bool _checkProxy;
         private readonly WebService _webService;
         private readonly InputService _inputService;
         private readonly string _site;
@@ -129,6 +131,7 @@ namespace SmartClicker_WPF.Services
             int loops,
             ICollection<AdDetect> adDetects,
             ProxyService proxyService,
+            bool checkProxy,
             ICollection<string> proxies,
             WebProxyType proxyType,
             string? username = null,
@@ -141,6 +144,7 @@ namespace SmartClicker_WPF.Services
             _username = username;
             _password = password;
             _useProxy = true;
+            _checkProxy = checkProxy;
         }
 
         public void Begin()
@@ -155,7 +159,7 @@ namespace SmartClicker_WPF.Services
         // Main function
         public async Task StartWork()
         {
-            
+
             try
             {
                 if (IsInProgress)
@@ -172,7 +176,6 @@ namespace SmartClicker_WPF.Services
                         Complete("Aborted");
                         return;
                     }
-
                     await CheckProxyBeforeUsage();
                     await DoCycle();
 
@@ -184,7 +187,7 @@ namespace SmartClicker_WPF.Services
 
                 Complete("Completed");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Complete(ex.Message);
             }
@@ -201,6 +204,10 @@ namespace SmartClicker_WPF.Services
             {
                 return;
             }
+            if (!_checkProxy)
+            {
+                return;
+            }
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -209,11 +216,11 @@ namespace SmartClicker_WPF.Services
                 bool working = false;
                 if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
                 {
-                    working = await _proxyService.CheckProxy(proxy, ProxyCheckTimeOutMs, _username, _password);
+                    working = await _proxyService.CheckProxy(cancellationToken, proxy, ProxyCheckTimeOutMs, _username, _password);
                 }
                 else
                 {
-                    working = await _proxyService.CheckProxy(proxy, ProxyCheckTimeOutMs);
+                    working = await _proxyService.CheckProxy(cancellationToken, proxy, ProxyCheckTimeOutMs);
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 if (working)
@@ -225,13 +232,25 @@ namespace SmartClicker_WPF.Services
                 {
                     OnLog.Invoke($"Proxy {proxy} don't work");
                     IncreaseProxyIndex();
-                   /* if ( == 0)
-                    {
-                        throw new Exception("No working proxy");
-                    }*/
+                    /* if ( == 0)
+                     {
+                         throw new Exception("No working proxy");
+                     }*/
                 }
             }
 
+        }
+
+        private async Task CheckSharedProxy()
+        {
+            if (_useProxy)
+            {
+                await Task.Delay(1000);
+                if (_driver.Url.Contains("www.google.com/sorry/"))
+                {
+                    throw new Exception("There is a captcha");
+                }
+            }
         }
 
         private async Task DoCycle()
@@ -254,6 +273,8 @@ namespace SmartClicker_WPF.Services
 
                 await TypeSearchingQeury(_keys.RandomElement());
                 await PressSearchingButton();
+
+                await CheckSharedProxy();
 
                 IWebElement link = await FindWebsiteLink();
                 await GoToSiteByLink(link);
@@ -278,8 +299,8 @@ namespace SmartClicker_WPF.Services
 
         private int IncreaseProxyIndex()
         {
-            _proxyIndex++;
-            if(_proxyIndex == _proxies.Count)
+            _proxyIndex = Math.Clamp(_proxyIndex + 1, 0, _proxies.Count);
+            if (_proxyIndex == _proxies.Count)
             {
                 _proxyIndex = 0;
             }
@@ -543,7 +564,7 @@ namespace SmartClicker_WPF.Services
             if (cookieButton != null)
             {
                 await Task.Delay(randDelay());
-                cookieButton.Click();
+                cookieButton.ClickSave();
 
                 cancellationToken.ThrowIfCancellationRequested();
                 OnLog.Invoke("Accepted cookies");

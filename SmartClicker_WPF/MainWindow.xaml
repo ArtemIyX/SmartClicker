@@ -174,7 +174,11 @@
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
-                        <CheckBox Content="Use proxy" IsChecked="{Binding UseProxy}"/>
+                        <WrapPanel VerticalAlignment="Center">
+                            <CheckBox Content="Use proxy" IsChecked="{Binding UseProxy}" Margin="2"/>
+                            <CheckBox Content="Check proxy" Margin="2" IsChecked="{Binding CheckProxy}"/>
+                        </WrapPanel>
+                       
                         <TextBlock Text="Proxy list" 
                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                Grid.Row="1"

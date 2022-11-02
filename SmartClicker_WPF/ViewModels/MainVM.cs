@@ -58,6 +58,9 @@ namespace SmartClicker_WPF.ViewModels
         private bool _useProxy;
 
         [ObservableProperty]
+        private bool _checkProxy;
+
+        [ObservableProperty]
         private string _proxyList;
 
         [ObservableProperty]
@@ -174,6 +177,7 @@ namespace SmartClicker_WPF.ViewModels
                    _loops,
                    _detects,
                    _proxyService,
+                   _checkProxy,
                    proxies,
                    (WebProxyType)(_selectedProxyTypeIndex),
                    string.IsNullOrEmpty(_proxyUserName) ? null : _proxyUserName,

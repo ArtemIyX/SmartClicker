@@ -54,7 +54,7 @@ namespace SmartClicker_WPF.Services
                 Credentials = new NetworkCredential(username, password)
             };
         }
-        private async Task<bool> TrySendRequest(HttpClientHandler clientHandler, int timeOutMs)
+        private async Task<bool> TrySendRequest(HttpClientHandler clientHandler, int timeOutMs, CancellationToken cancellationToken)
         {
             using (var httpClient = new HttpClient(handler: clientHandler, disposeHandler: true)
             {
@@ -63,8 +63,13 @@ namespace SmartClicker_WPF.Services
             {
                 try
                 {
-                    var response = await httpClient.GetAsync(ProxyCheckApiUrl);
+                    var response = await httpClient.GetAsync(ProxyCheckApiUrl, cancellationToken);
                     return true;
+                }
+                catch(TaskCanceledException ex)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return false;
                 }
                 catch
                 {
@@ -73,19 +78,19 @@ namespace SmartClicker_WPF.Services
             }
         }
 
-        public async Task<bool> CheckProxy(string proxy, int timeOutMs)
+        public async Task<bool> CheckProxy(CancellationToken cancellationToken, string proxy, int timeOutMs)
         {
             var port_ip = proxy.Split(":");
             var httpClientHandler = CreateProxyHandler(port_ip[0], port_ip[1]);
-            return await TrySendRequest(httpClientHandler, timeOutMs);
+            return await TrySendRequest(httpClientHandler, timeOutMs, cancellationToken);
             
         }
 
-        public async Task<bool> CheckProxy(string proxy, int timeOutMs, string username, string password)
+        public async Task<bool> CheckProxy(CancellationToken cancellationToken, string proxy, int timeOutMs, string username, string password)
         {
             var port_ip = proxy.Split(":");
             var httpClientHandler = CreateProxyHandler(port_ip[0], port_ip[1], username, password);
-            return await TrySendRequest(httpClientHandler, timeOutMs);
+            return await TrySendRequest(httpClientHandler, timeOutMs, cancellationToken);
 
         }
 

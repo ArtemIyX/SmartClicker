@@ -20,7 +20,7 @@ namespace SmartClicker_WPF.Services
 
         public WebService()
         {
-            TimeOutSec = 30;
+            TimeOutSec = 120;
         }
 
         private SeleniumProxyAuthentication.ProxyProtocols ToLibProtocol(WebProxyType webProxyType)
