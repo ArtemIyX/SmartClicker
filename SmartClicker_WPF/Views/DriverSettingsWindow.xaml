@@ -27,8 +27,7 @@
             <RowDefinition Height="50"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="50"/>
+
             <RowDefinition Height="*"/>
             <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
@@ -58,18 +57,11 @@
                 <TextBlock Text="..."/>
             </Button>
         </Grid>
-        <TextBlock Grid.Row="4" Text="Edge driver path" VerticalAlignment="Bottom" Style="{DynamicResource MaterialDesignCaptionTextBlock}"/>
         <Grid Grid.Row="5" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="65"/>
             </Grid.ColumnDefinitions>
-            <TextBox Margin="2" md:HintAssist.Hint="Edge" 
-                     Style="{DynamicResource MaterialDesignFilledTextBox}" 
-                     Text="{Binding EdgePath}"/>
-            <Button Margin="2" Grid.Column="1" Command="{Binding EdgeSelectCommand}" Cursor="Hand">
-                <TextBlock Text="..."/>
-            </Button>
         </Grid>
         <StackPanel Grid.Row="7" 
                     Orientation="Horizontal"

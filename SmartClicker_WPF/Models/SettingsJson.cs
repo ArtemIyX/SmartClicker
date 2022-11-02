@@ -15,14 +15,13 @@ namespace SmartClicker_WPF.Models
     }
     public enum WebDriverType
     {
-        /*Edge, Don't support http proxy with auth*/
+        /*Edge, Don't support https proxy with auth*/
         Chrome,
         Firefox
     }
     public class SettingsJson
     {
         public string? ChromeDriverPath { get; set; }
-        public string? EdgeDriverPath { get; set; }
         public string? FirefoxDriverPath { get; set; }
     }
 }

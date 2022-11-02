@@ -8,14 +8,17 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <StartupObject>SmartClicker_WPF.App</StartupObject>
     <ApplicationIcon>Resources\Icons\icon.ico</ApplicationIcon>
+    <AssemblyName>SmartClicker</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

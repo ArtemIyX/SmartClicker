@@ -242,6 +242,7 @@
                         <TextBox md:HintAssist.Hint="Password" 
                              VerticalAlignment="Center"
                              Grid.Row="5" 
+  
                              HorizontalAlignment="Left"
                              Width="150"
                              Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
