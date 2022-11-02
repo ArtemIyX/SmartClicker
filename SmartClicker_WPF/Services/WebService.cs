@@ -102,7 +102,7 @@ namespace SmartClicker_WPF.Services
         private ChromeOptions CreateChromeOptions()
         {
             ChromeOptions options = new ChromeOptions();
-            options.AddArgument("--start-maximized");
+            //options.AddArgument("--start-maximized");
             options.AddArgument("--disable-popup-blocking");
             options.AddExcludedArgument("enable-automation");
             return options;

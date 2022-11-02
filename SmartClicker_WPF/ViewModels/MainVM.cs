@@ -265,11 +265,14 @@ namespace SmartClicker_WPF.ViewModels
         private void Tasker_OnFinished(string reason)
         {
             AddLog($"Finished: {reason}" );
+            
         }
 
         private void Tasker_OnCompleted()
         {
             CurrentProxy = "None";
+            Status = ((WebTaskerState)(0)).ToString();
+            CurrentIteration = 0;
             _cancellationTokenSource = null;
         }
 
