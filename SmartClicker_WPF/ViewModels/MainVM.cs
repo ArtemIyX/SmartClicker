@@ -52,6 +52,10 @@ namespace SmartClicker_WPF.ViewModels
             Loops = 5;
             SiteUrl = @"101gardentools.com";
             KeyWords = "";
+            CurrentIteration = 0;
+            TotalClicks = 0;
+            Status = "None";
+            CurrentProxy = "None";
         }
 
         [ObservableProperty]
@@ -104,6 +108,18 @@ namespace SmartClicker_WPF.ViewModels
 
         [ObservableProperty]
         private int _selectedLogIndex;
+
+        [ObservableProperty]
+        private int _currentIteration;
+
+        [ObservableProperty]
+        private int _totalClicks;
+
+        [ObservableProperty]
+        private string _status;
+
+        [ObservableProperty]
+        private string _currentProxy;
 
         [RelayCommand]
         public void RemoveDetect(object sender)
@@ -197,13 +213,26 @@ namespace SmartClicker_WPF.ViewModels
                    _detects);
             }
             Tasker.MaxPageCount = 20;
+            Tasker.OnAdClicksChanged += Tasker_OnAdClicksChanged;
+            Tasker.OnStatusChanged += Tasker_OnStatusChanged;
+            Tasker.OnIterationChanged += Tasker_OnIterationChanged;
+            Tasker.OnUsingProxy += Tasker_OnUsingProxy;
             Tasker.OnFinished += Tasker_OnFinished;
             Tasker.OnCompleted += Tasker_OnCompleted;
             Tasker.OnLog += Tasker_OnLog;
 
+            CurrentIteration = 0;
+            Status = ((WebTaskerState)(0)).ToString();
+            TotalClicks = 0;
+
             await Tasker.StartWork();
-            
         }
+
+        private void Tasker_OnUsingProxy(string proxy)
+        {
+            CurrentProxy = proxy;
+        }
+
         public bool CanStart() => Tasker == null || (Tasker != null && !Tasker.IsInProgress);
 
         private void CheckBeforeStart()
@@ -235,14 +264,30 @@ namespace SmartClicker_WPF.ViewModels
 
         private void Tasker_OnFinished(string reason)
         {
-            //MainButtonTitle = StartButtonLabel;
             AddLog($"Finished: {reason}" );
         }
 
         private void Tasker_OnCompleted()
         {
+            CurrentProxy = "None";
             _cancellationTokenSource = null;
         }
+
+        private void Tasker_OnIterationChanged(int iteration)
+        {
+            CurrentIteration = iteration + 1;
+        }
+
+        private void Tasker_OnStatusChanged(string status)
+        {
+            Status = status;
+        }
+
+        private void Tasker_OnAdClicksChanged(int adClicks)
+        {
+            TotalClicks = adClicks;
+        }
+
 
         //TODO: To service
         private string GetDriverPath()

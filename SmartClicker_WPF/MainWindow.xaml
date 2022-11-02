@@ -33,6 +33,36 @@
                 <MenuItem Header="Driver settings" Command="{Binding OpenDriverSettingsCommand}"/>
             </MenuItem>
         </Menu>
+        <md:Card  DockPanel.Dock="Bottom" Margin="5"
+                    VerticalAlignment="Stretch" 
+                    HorizontalAlignment="Stretch">
+            <Grid Margin="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="25*"/>
+                    <ColumnDefinition Width="25*"/>
+                    <ColumnDefinition Width="25*"/>
+                    <ColumnDefinition Width="25*"/>
+                </Grid.ColumnDefinitions>
+
+                <WrapPanel>
+                    <TextBlock Text="Iteration: "/>
+                    <TextBlock Text="{Binding CurrentIteration}"/>
+                </WrapPanel>
+                <WrapPanel Grid.Column="1">
+                    <TextBlock Text="Ad clicks: "/>
+                    <TextBlock Text="{Binding TotalClicks}"/>
+                </WrapPanel>
+                <WrapPanel Grid.Column="2">
+                    <TextBlock Text="Status: "/>
+                    <TextBlock Text="{Binding Status}"/>
+                </WrapPanel>
+                <WrapPanel Grid.Column="3">
+                    <TextBlock Text="Proxy: "/>
+                    <TextBlock Text="{Binding CurrentProxy}"/>
+                </WrapPanel>
+            </Grid>
+        </md:Card>
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
@@ -273,6 +303,7 @@
                 </WrapPanel>
             </Grid>
         </Grid>
+        
     </DockPanel>
 
 </Window>

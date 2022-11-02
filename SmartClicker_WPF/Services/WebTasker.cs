@@ -66,10 +66,44 @@ namespace SmartClicker_WPF.Services
         public event Action<string> OnFinished;
         public event Action OnCompleted;
         public event Action<string> OnLog;
+        public event Action<int> OnIterationChanged;
+        public event Action<string> OnStatusChanged;
+        public event Action<int> OnAdClicksChanged;
+        public event Action<string> OnUsingProxy;
 
         public bool IsInProgress { get; private set; } = false;
-        public int CurrentIteration { get; private set; } = 0;
-        public WebTaskerState State { get; private set; } = WebTaskerState.None;
+
+        private int _currentIteration = 0;
+        public int CurrentIteration
+        {
+            get => _currentIteration; private set
+            {
+                _currentIteration = value;
+                OnIterationChanged.Invoke(_currentIteration);
+            }
+        }
+
+        private WebTaskerState _state = WebTaskerState.None;
+        public WebTaskerState State
+        {
+            get => _state;
+            private set
+            {
+                _state = value;
+                OnStatusChanged.Invoke(_state.ToString());
+            }
+        }
+
+        private int _adClicks = 0;
+        public int AdClicks
+        {
+            get => _adClicks; 
+            private set
+            {
+                _adClicks = value;
+                OnAdClicksChanged.Invoke(_adClicks);
+            }
+        }
 
         //TODO: To struct
 
@@ -147,14 +181,6 @@ namespace SmartClicker_WPF.Services
             _checkProxy = checkProxy;
         }
 
-        public void Begin()
-        {
-            Task.Run(async () =>
-            {
-                await StartWork();
-            });
-        }
-
         //TODO: Check why dont work
         // Main function
         public async Task StartWork()
@@ -177,6 +203,10 @@ namespace SmartClicker_WPF.Services
                         return;
                     }
                     await CheckProxyBeforeUsage();
+                    if (_useProxy)
+                    {
+                        OnUsingProxy.Invoke(_proxies.ElementAt(_proxyIndex));
+                    }
                     await DoCycle();
 
                     if (_useProxy)
@@ -196,6 +226,8 @@ namespace SmartClicker_WPF.Services
         {
             FinishWork(reason);
             IsInProgress = false;
+            AdClicks = 0;
+            CurrentIteration = 0;
             OnCompleted.Invoke();
         }
         private async Task CheckProxyBeforeUsage()
@@ -214,6 +246,7 @@ namespace SmartClicker_WPF.Services
                 string proxy = _proxies.ElementAt(_proxyIndex);
 
                 bool working = false;
+                OnLog.Invoke($"Checking proxy {proxy}...");
                 if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
                 {
                     working = await _proxyService.CheckProxy(cancellationToken, proxy, ProxyCheckTimeOutMs, _username, _password);
@@ -232,10 +265,6 @@ namespace SmartClicker_WPF.Services
                 {
                     OnLog.Invoke($"Proxy {proxy} don't work");
                     IncreaseProxyIndex();
-                    /* if ( == 0)
-                     {
-                         throw new Exception("No working proxy");
-                     }*/
                 }
             }
 
@@ -284,6 +313,7 @@ namespace SmartClicker_WPF.Services
 
                 if (await GoToAdSite(_timeOut))
                 {
+                    AdClicks = AdClicks + 1;
                     State = WebTaskerState.DoingActivityOnAdSite;
                     await DoSomeActivityFor(_timeOut / 2);
                 }
