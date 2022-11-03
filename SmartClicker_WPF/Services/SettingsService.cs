@@ -18,7 +18,23 @@ namespace SmartClicker_WPF.Services
             {
                 //EdgeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "edgedriver_win64",
                 FirefoxDriverPath = AppDomain.CurrentDomain.BaseDirectory + "geckodriver-v0.32.0-win32",
-                ChromeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32"
+                ChromeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32",
+                TimeOut_CookieButton = 7,
+                TimeOut_SearchBar = 7,
+                TimeOut_SearchButton = 7,
+                TimeOut_SearchSite = 10,
+                TimeOut_NavTable = 10,
+                TimeOut_Page = 5,
+                TimeOut_PageLoad = 60,
+                TimeOut_ProxyCheckerMs = 5000,
+                TimeOut_FindLink = 3,
+                TimeOut_LinkClick = 7,
+                DelayBetweenActivityMs = 1000,
+                MaxPageCount = 20,
+                HideConsole = true,
+                HideBrowser = true,
+                RandomDelayBetweenActivity = true,
+                GoogleDismisButtonId = "dismiss-button"
             };
         private string FullSavePath => AppDomain.CurrentDomain.BaseDirectory + SavePath;
 

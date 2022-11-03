@@ -29,9 +29,15 @@ namespace SmartClicker_WPF.Services
         private CancellationToken _cancellationToken;
         public static Random MakerRandom;
 
-        public int LinkTimeouts { get; set; } = 10;
-        public int AdTimeoutS { get; set; } = 2;
+        //wait until new page with another url is loaded
+        public int LinkClickTimeoutS { get; set; } = 10;
+        //Find ad banner
+        public int FindLinkTimeoutS { get; set; } = 2;
         public int DelayBettwenActivityMs { get; set; } = 500;
+
+        private int DelayMS => UseRandomDelay ? MakerRandom.Next(DelayBettwenActivityMs / 5, DelayBettwenActivityMs + (DelayBettwenActivityMs / 2)) : DelayBettwenActivityMs;
+
+        public bool UseRandomDelay { get;set; }
         //Pop-up ad
         public string GoogleDismisButtonId { get; set; } = "dismiss-button";
 
@@ -65,7 +71,7 @@ namespace SmartClicker_WPF.Services
                 bool result = await GoToRandomLink();
                 if (result)
                 {
-                    await Task.Delay(DelayBettwenActivityMs);
+                    await Task.Delay(DelayMS);
                 }
                 else
                 {
@@ -151,8 +157,7 @@ namespace SmartClicker_WPF.Services
                     return false;
                 }
 
-                // Wait one second
-                await Task.Delay(1000);
+                await Task.Delay(DelayMS);
                 // Find new element in site
                 bool loadedNewPage = await WaitUntilNewPageIsLoaded(currentUrl);
                 if (!loadedNewPage)
@@ -171,7 +176,7 @@ namespace SmartClicker_WPF.Services
 
         private async Task<bool> WaitUntilNewPageIsLoaded(string currentUrl)
         {
-            IWebElement? newElement = await _driver.FindElementAsync(LinkTimeouts, drv =>
+            IWebElement? newElement = await _driver.FindElementAsync(LinkClickTimeoutS, drv =>
             {
                 // Another url 
                 if (currentUrl == _driver.Url)
@@ -351,7 +356,7 @@ namespace SmartClicker_WPF.Services
                     n--;
                     var iframe = iframes.RandomElement();
                     _driver.SwitchTo().Frame(iframe);
-                    IWebElement? link = await _driver.FindElementAsync(AdTimeoutS, GetAdCondition(adDetect));
+                    IWebElement? link = await _driver.FindElementAsync(FindLinkTimeoutS, GetAdCondition(adDetect));
                     _driver.SwitchTo().DefaultContent();
                     if (link != null)
                     {
@@ -404,7 +409,7 @@ namespace SmartClicker_WPF.Services
                     return (result.iframe, result.banner);
                 }
                 await GoToRandomLink();
-                await Task.Delay(DelayBettwenActivityMs);
+                await Task.Delay(DelayMS);
             }
         }
     }
