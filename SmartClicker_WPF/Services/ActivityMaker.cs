@@ -53,8 +53,8 @@ namespace SmartClicker_WPF.Services
             _cancelTokenSource.CancelAfter(seconds * 1000);
             while (true)
             {
-                if (_cancellationToken.IsCancellationRequested)
-                    _cancellationToken.ThrowIfCancellationRequested();
+                _cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
                 int n = MakerRandom.Next(4);
                 for (int i = 0; i < n; ++i)

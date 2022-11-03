@@ -34,14 +34,14 @@ namespace SmartClicker_WPF.ViewModels
         {
             ChromePath = settingsJson.ChromeDriverPath;
             FirefoxPath = settingsJson.FirefoxDriverPath;
-            EdgePath = settingsJson.EdgeDriverPath;
+            //EdgePath = settingsJson.EdgeDriverPath;
         }
 
         public void ModifySettings(SettingsJson settingsJson)
         {
             settingsJson.ChromeDriverPath = ChromePath;
             settingsJson.FirefoxDriverPath = FirefoxPath;
-            settingsJson.EdgeDriverPath = EdgePath;
+            //settingsJson.EdgeDriverPath = EdgePath;
         }
 
         private (bool, string) SelectLocation()
