@@ -62,9 +62,15 @@ namespace SmartClicker_WPF.Services
                     await ScrollToRandomElement();
                 }
 
-                await GoToRandomLink();
-
-                await Task.Delay(DelayBettwenActivityMs);
+                bool result = await GoToRandomLink();
+                if (result)
+                {
+                    await Task.Delay(DelayBettwenActivityMs);
+                }
+                else
+                {
+                    _driver.Navigate().GoToUrl("https://" + new Uri(_driver.Url).Host);
+                }
             }
         }
 
@@ -191,7 +197,6 @@ namespace SmartClicker_WPF.Services
                 if (el != null)
                 {
                     return await _driver.ScrollTo(el);
-
                 }
 
             }

@@ -31,6 +31,11 @@ public class Program
         webDriver = GetChromeDriver();
         webDriver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(120);
         webDriver.Navigate().GoToUrl(baseUrl);
+        Console.Clear();
+        Console.WriteLine(webDriver.PageSource);
+        Thread.Sleep(2000);
+        webDriver.Navigate().GoToUrl("https://www.google.com/");
+        Console.Clear();
 
     }
 
@@ -40,14 +45,17 @@ public class Program
     public static ChromeDriver GetChromeDriver()
     {
         var proxy = new Proxy();
-        //proxy.HttpProxy = "168.181.229.173:50100";
-        //proxy.SslProxy = "168.181.229.173:50100";
-        //proxy.SocksPassword = "79uBp6hDoW";
+        var chromeDriverService = ChromeDriverService.CreateDefaultService(driverPath);
+        chromeDriverService.HideCommandPromptWindow = true;
         var options = new ChromeOptions();
-        options.AddHttpProxy("168.181.229.173", 50100, "evgeniypo", "79uBp6hDoW");
-        //ptions.Proxy = proxy;
-        //options.AddArguments("--disable-extensions");
-        var driver = new ChromeDriver(driverPath, options, TimeSpan.FromSeconds(120));
+
+        options.AddArguments(new List<string>() {
+            "--silent-launch",
+            "--no-startup-window",
+            "no-sandbox",
+            "headless",});
+
+        var driver = new ChromeDriver(chromeDriverService, options, TimeSpan.FromSeconds(60));
         return driver;
     }
 }

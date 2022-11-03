@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using SmartClicker_WPF.Interfaces;
 using SmartClicker_WPF.Models;
 using SmartClicker_WPF.Services;
 using System;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace SmartClicker_WPF.ViewModels
 {
     [ObservableObject]
-    public partial class DriverSettingsVM
+    public partial class DriverSettingsVM : ISettingsVM
     {
         private SettingsService _settingsService;
         public DriverSettingsVM(SettingsService settingsService)
@@ -34,14 +35,12 @@ namespace SmartClicker_WPF.ViewModels
         {
             ChromePath = settingsJson.ChromeDriverPath;
             FirefoxPath = settingsJson.FirefoxDriverPath;
-            //EdgePath = settingsJson.EdgeDriverPath;
         }
 
         public void ModifySettings(SettingsJson settingsJson)
         {
             settingsJson.ChromeDriverPath = ChromePath;
             settingsJson.FirefoxDriverPath = FirefoxPath;
-            //settingsJson.EdgeDriverPath = EdgePath;
         }
 
         private (bool, string) SelectLocation()

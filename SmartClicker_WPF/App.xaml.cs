@@ -50,6 +50,8 @@ namespace SmartClicker_WPF
             services.AddTransient<MainVM>();
             services.AddTransient<DriverSettingsVM>();
             services.AddTransient<DriverSettingsWindow>();
+            services.AddTransient<ClickerSettingsVM>();
+            services.AddTransient<ClickerSettingsWindow>();
             services.AddTransient<WebService>();
         }
 

@@ -18,18 +18,18 @@ using System.Windows.Shapes;
 namespace SmartClicker_WPF.Views
 {
     /// <summary>
-    /// Логика взаимодействия для DriverSettingsWindow.xaml
+    /// Логика взаимодействия для ClickerSettings.xaml
     /// </summary>
-    public partial class DriverSettingsWindow : Window, ISettingsWindow
+    public partial class ClickerSettingsWindow : Window, ISettingsWindow
     {
-        public DriverSettingsVM ViewModel => (DriverSettingsVM)DataContext;
-        public DriverSettingsWindow(DriverSettingsVM VM)
+        public ClickerSettingsVM ViewModel => (ClickerSettingsVM)DataContext;
+        public ClickerSettingsWindow(ClickerSettingsVM VM)
         {
             this.DataContext = VM;
             InitializeComponent();
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }

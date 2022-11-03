@@ -31,6 +31,7 @@
             </MenuItem>
             <MenuItem Header="Settings">
                 <MenuItem Header="Driver settings" Command="{Binding OpenDriverSettingsCommand}"/>
+                <MenuItem Header="Clicker settings" Command="{Binding OpenClickerSettingsCommand}"/>
             </MenuItem>
         </Menu>
         <md:Card  DockPanel.Dock="Bottom" Margin="5"

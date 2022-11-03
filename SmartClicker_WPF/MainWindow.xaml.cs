@@ -24,12 +24,10 @@ namespace SmartClicker_WPF
     public partial class MainWindow : Window
     {
         private MainVM viewmodel => (MainVM)DataContext;
-
-        private InputService _inputService;
-
-        public MainWindow(InputService inputService, MainVM mainVM)
+        private SettingsService _settingsService;
+        public MainWindow(SettingsService settingsService, MainVM mainVM)
         {
-            _inputService = inputService;
+            _settingsService = settingsService;
             this.DataContext = mainVM;
             InitializeComponent();
         }
@@ -42,6 +40,7 @@ namespace SmartClicker_WPF
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             viewmodel.Tasker?.FinishWork("Window is closing");
+            _settingsService.SaveSettingsObject(viewmodel.SettingsJson);
         }
     }
 }

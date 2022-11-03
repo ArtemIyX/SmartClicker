@@ -224,7 +224,7 @@ namespace SmartClicker_WPF.Services
         }
         private void Complete(string reason)
         {
-            FinishWork(reason);
+            FinishWork(reason + $" Clicks: {_adClicks}, Iterations: {_currentIteration}");
             IsInProgress = false;
             AdClicks = 0;
             CurrentIteration = 0;
@@ -355,6 +355,7 @@ namespace SmartClicker_WPF.Services
             }
             finally
             {
+                _pageIndex = 1;
                 State = WebTaskerState.None;
                 OnFinished.Invoke(reason);
             }
@@ -401,7 +402,8 @@ namespace SmartClicker_WPF.Services
                 }
                 catch
                 {
-                    OnLog.Invoke("Time is up, did not find ad banner");
+                    //OnLog.Invoke("");
+                    throw new Exception("Time is up, did not find ad banner");
                 }
 
                 i--;
@@ -424,6 +426,10 @@ namespace SmartClicker_WPF.Services
             {
                 OnLog.Invoke("Activity is done");
             }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         // Try find site by search result
@@ -432,7 +438,7 @@ namespace SmartClicker_WPF.Services
             State = WebTaskerState.SearchingForWebSite;
 
             OnLog.Invoke($"Searching for website {_site}...");
-
+            _pageIndex = 1; 
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();

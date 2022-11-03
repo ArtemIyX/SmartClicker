@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SmartClicker_WPF.Interfaces;
 using SmartClicker_WPF.Models;
 using SmartClicker_WPF.Services;
 using SmartClicker_WPF.Views;
@@ -21,7 +22,7 @@ namespace SmartClicker_WPF.ViewModels
     public partial class MainVM
     {
         private SettingsService _settingsService;
-        private SettingsJson _settingsJson;
+        public SettingsJson SettingsJson { get; private set; }
         private FooManager _fooManager;
         private ProxyService _proxyService;
         private WebService _webService;
@@ -39,9 +40,9 @@ namespace SmartClicker_WPF.ViewModels
             _fooManager = FooManager;
             _proxyService = ProxyService;
             _inputService = inputService;
-            _settingsJson = _settingsService.GetSettingsObject();
+            SettingsJson = _settingsService.GetSettingsObject();
 
-            Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
+            Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(SettingsJson));
             Detects = new ObservableCollection<AdDetect>();
             ProxyTypes = new ObservableCollection<string>(_proxyService.GetProxyTypesString());
             Logs = new ObservableCollection<LogModel>();
@@ -147,15 +148,23 @@ namespace SmartClicker_WPF.ViewModels
             DriverSettingsWindow? window = _fooManager.ServiceProvider.GetService(typeof(DriverSettingsWindow)) as DriverSettingsWindow;
             if (window == null)
                 throw new Exception("Can not get service (DriverSettingsWindow)");
+
             int selected = Drivers.IndexOf(SelectedDriver);
 
-            window.ViewModel.InsertSettings(_settingsJson);
-            window.ShowDialog();
-            window.ViewModel.ModifySettings(_settingsJson);
-            await _settingsService.SaveSettingsObjectAsync(_settingsJson);
+            await OpenSettingsWindow(window);
 
-            Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(_settingsJson));
+            Drivers = new ObservableCollection<Driver>(_settingsService.GetDrivers(SettingsJson));
             SelectedDriver = Drivers[selected];
+        }
+
+        [RelayCommand]
+        public async Task OpenClickerSettings()
+        {
+            ClickerSettingsWindow? window = _fooManager.ServiceProvider.GetService(typeof(ClickerSettingsWindow)) as ClickerSettingsWindow;
+            if (window == null)
+                throw new Exception("Can not get service (ClickerSettingsWindow)");
+
+            await OpenSettingsWindow(window);
         }
 
         [RelayCommand]
@@ -227,6 +236,15 @@ namespace SmartClicker_WPF.ViewModels
 
             await Tasker.StartWork();
         }
+
+        private async Task OpenSettingsWindow(ISettingsWindow window)
+        {
+            window.InsertSettings(SettingsJson);
+            window.ShowAsDialog();
+            window.ModifySettings(SettingsJson);
+            await _settingsService.SaveSettingsObjectAsync(SettingsJson);
+        }
+
 
         private void Tasker_OnUsingProxy(string proxy)
         {
