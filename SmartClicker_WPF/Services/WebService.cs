@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Proxy = OpenQA.Selenium.Proxy;
 
 namespace SmartClicker_WPF.Services
 {
@@ -34,14 +35,17 @@ namespace SmartClicker_WPF.Services
                 case WebProxyType.Socks5:
                     return SeleniumProxyAuthentication.ProxyProtocols.SOCKS5;
             }
+
             return SeleniumProxyAuthentication.ProxyProtocols.HTTP;
         }
 
         private OpenQA.Selenium.Proxy CreateProxy(WebProxyType type, string ip)
         {
-            OpenQA.Selenium.Proxy res = new OpenQA.Selenium.Proxy();
-            res.Kind = ProxyKind.Manual;
-            res.IsAutoDetect = false;
+            OpenQA.Selenium.Proxy res = new OpenQA.Selenium.Proxy
+            {
+                Kind = ProxyKind.Manual,
+                IsAutoDetect = false
+            };
 
             switch (type)
             {
@@ -58,111 +62,193 @@ namespace SmartClicker_WPF.Services
                     res.SocksVersion = 5;
                     break;
             }
+
             return res;
         }
 
-        public WebDriver CreateWebDriver(string path, WebDriverType webDriverType)
+        public WebDriver CreateWebDriver(string path, 
+            WebDriverType webDriverType,
+            bool hideBrowser = false,
+            bool hideConsole = false)
         {
             switch (webDriverType)
             {
                 case WebDriverType.Chrome:
-                    return CreateChromeDriver(path);
+                    return CreateChromeDriver(path, hideBrowser, hideConsole);
                 case WebDriverType.Firefox:
-                    return CreateFirefoxDriver(path);
+                    return CreateFirefoxDriver(path, hideBrowser, hideConsole);
             }
+
             return new ChromeDriver();
         }
-        public WebDriver CreateWebDriverWithProxy(string path, WebDriverType webDriverType, WebProxyType webProxyType, string ip)
+
+        public WebDriver CreateWebDriverWithProxy(string path,
+            WebDriverType webDriverType,
+            WebProxyType webProxyType,
+            string ip,
+            bool hideBrowser = false,
+            bool hideConsole = false)
         {
             switch (webDriverType)
             {
                 case WebDriverType.Chrome:
-                    return CreateChromeDriverWithProxy(path, webProxyType, ip);
+                    return CreateChromeDriverWithProxy(path, webProxyType, ip, hideBrowser, hideConsole);
                 case WebDriverType.Firefox:
-                    return CreateFirefoxDriverWithProxy(path, webProxyType, ip);
+                    return CreateFirefoxDriverWithProxy(path, webProxyType, ip, hideBrowser, hideConsole);
             }
+
             return new ChromeDriver();
         }
 
         public WebDriver CreateWebDriverWithPrivateProxy(string path, WebDriverType webDriverType,
             WebProxyType webProxyType, string ip,
             string username,
-            string password)
+            string password,
+            bool hideBrowser = false,
+            bool hideConsole = false)
         {
             switch (webDriverType)
             {
                 case WebDriverType.Chrome:
-                    return CreateChromeDriverWithPrivateProxy(path, webProxyType, ip, username, password);
+                    return CreateChromeDriverWithPrivateProxy(path, webProxyType, ip, username, password, hideBrowser, hideConsole);
                 case WebDriverType.Firefox:
-                    return CreateFirefoxDriverWithPrivateProxy(path, webProxyType, ip, username, password);
+                    return CreateFirefoxDriverWithPrivateProxy(path, webProxyType, ip, username, password, hideBrowser, hideConsole);
             }
+
             return new ChromeDriver();
         }
 
-        private ChromeOptions CreateChromeOptions()
+        private ChromeOptions CreateChromeOptions(bool hideBrowser)
         {
             ChromeOptions options = new ChromeOptions();
-            //options.AddArgument("--start-maximized");
             options.AddArgument("--disable-popup-blocking");
             options.AddExcludedArgument("enable-automation");
+            if (hideBrowser)
+            {
+                options.AddArguments(new List<string>
+                {
+                    "--silent-launch",
+                    "--no-startup-window",
+                    "no-sandbox",
+                    "headless"
+                });
+            }
+
             return options;
         }
 
-        public ChromeDriver CreateChromeDriver(string path)
+        private FirefoxOptions CreateFireFoxOptions(bool hideBrowser)
         {
-            var driver = new ChromeDriver(path, CreateChromeOptions(), TimeSpan.FromSeconds(TimeOutSec));
-            return driver;
+            FirefoxOptions options = new FirefoxOptions();
+            if (hideBrowser)
+            {
+                /*options.AddArguments(new List<string>
+                {
+                    "--silent-launch",
+                    "--no-startup-window",
+                    "no-sandbox",
+                    "headless"
+                });*/
+                options.AddArguments("--headless");
+            }
+
+            return options;
         }
 
-        public ChromeDriver CreateChromeDriverWithProxy(string path, WebProxyType webProxyType, string ip)
+        public ChromeDriver CreateChromeDriver(string path, bool hideBrowser = false, bool hideConsole = false)
         {
-            var options = CreateChromeOptions();
+            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService(path);
+            chromeDriverService.HideCommandPromptWindow = hideConsole;
+            return new ChromeDriver(chromeDriverService,
+                CreateChromeOptions(hideBrowser), TimeSpan.FromSeconds(TimeOutSec));
+            ;
+        }
+
+        public ChromeDriver CreateChromeDriverWithProxy(string path,
+            WebProxyType webProxyType, string ip,
+            bool hideBrowser = false, bool hideConsole = false)
+        {
+            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService(path);
+            chromeDriverService.HideCommandPromptWindow = hideConsole;
+
+            ChromeOptions options = CreateChromeOptions(hideBrowser);
             OpenQA.Selenium.Proxy proxy = CreateProxy(webProxyType, ip);
+
             options.Proxy = proxy;
-            var driver = new ChromeDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
-            return driver;
+
+            return new ChromeDriver(chromeDriverService,
+                options,
+                TimeSpan.FromSeconds(TimeOutSec));
+            ;
         }
 
         public ChromeDriver CreateChromeDriverWithPrivateProxy(string path,
             WebProxyType webProxyType, string ip,
             string username,
-            string password)
+            string password,
+            bool hideBrowser = false, bool hideConsole = false)
         {
-            var options = CreateChromeOptions();
-            string[] ip_port = ip.Split(":");
-            options.AddHttpProxy(ip_port[0], int.Parse(ip_port[1]), username, password);
-            var driver = new ChromeDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
-            return driver;
+            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService(path);
+            chromeDriverService.HideCommandPromptWindow = hideConsole;
+
+            ChromeOptions options = CreateChromeOptions(hideBrowser);
+            if (webProxyType == WebProxyType.Https)
+            {
+                string[] ipPort = ip.Split(":");
+                options.AddHttpProxy(ipPort[0], int.Parse(ipPort[1]), username, password);
+            }
+            else
+            {
+                OpenQA.Selenium.Proxy proxy = CreateProxy(webProxyType, ip);
+                proxy.SocksUserName = username;
+                proxy.SocksPassword = password;
+                options.Proxy = proxy;
+            }
+
+            return new ChromeDriver(chromeDriverService,
+                options,
+                TimeSpan.FromSeconds(TimeOutSec));
+            ;
         }
 
-        public FirefoxDriver CreateFirefoxDriver(string path)
+        public FirefoxDriver CreateFirefoxDriver(string path,
+            bool hideBrowser = false, bool hideConsole = false)
         {
-            var options = new FirefoxOptions();
-            var driver = new FirefoxDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
-            return driver;
+            FirefoxDriverService firefoxDriverService = FirefoxDriverService.CreateDefaultService(path);
+            firefoxDriverService.HideCommandPromptWindow = hideConsole;
+            FirefoxOptions options = CreateFireFoxOptions(hideBrowser);
+            return new FirefoxDriver(firefoxDriverService,
+                options, TimeSpan.FromSeconds(TimeOutSec));
         }
 
-        public FirefoxDriver CreateFirefoxDriverWithProxy(string path, WebProxyType webProxyType, string ip)
+        public FirefoxDriver CreateFirefoxDriverWithProxy(string path,
+            WebProxyType webProxyType, string ip,
+            bool hideBrowser = false, bool hideConsole = false)
         {
-            var options = new FirefoxOptions();
+            FirefoxDriverService firefoxDriverService = FirefoxDriverService.CreateDefaultService(path);
+            firefoxDriverService.HideCommandPromptWindow = hideConsole;
+            FirefoxOptions options = CreateFireFoxOptions(hideBrowser);
             OpenQA.Selenium.Proxy proxy = CreateProxy(webProxyType, ip);
-            var driver = new FirefoxDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
-            return driver;
+            return new FirefoxDriver(firefoxDriverService, options, TimeSpan.FromSeconds(TimeOutSec));
         }
 
         public FirefoxDriver CreateFirefoxDriverWithPrivateProxy(string path,
             WebProxyType webProxyType, string ip,
             string username,
-            string password)
+            string password,
+            bool hideBrowser = false, bool hideConsole = false)
         {
-            var options = new FirefoxOptions();
-            var driver = new FirefoxDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
-            SeleniumProxyAuthentication.ProxyProtocols libProtocol = ToLibProtocol(webProxyType);
-            string[] ip_port = ip.Split(":");
-            string proxyStr = $"{ip_port[0]}:{ip_port[1]}:{username}:{password}";
-            driver.AddProxyAuthenticationExtension(new SeleniumProxyAuthentication.Proxy(libProtocol, proxyStr));
+            FirefoxDriverService firefoxDriverService = FirefoxDriverService.CreateDefaultService(path);
+            firefoxDriverService.HideCommandPromptWindow = hideConsole;
+            FirefoxOptions options = CreateFireFoxOptions(hideBrowser);
+            FirefoxDriver driver = new FirefoxDriver(path, options, TimeSpan.FromSeconds(TimeOutSec));
+
+            string[] ipPort = ip.Split(":");
+            string proxyStr = $"{ipPort[0]}:{ipPort[1]}:{username}:{password}";
+
+            driver.AddProxyAuthenticationExtension(
+                new SeleniumProxyAuthentication.Proxy(ToLibProtocol(webProxyType), proxyStr));
             return driver;
         }
-
     }
 }

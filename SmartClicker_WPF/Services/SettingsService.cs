@@ -99,7 +99,6 @@ namespace SmartClicker_WPF.Services
             List<Driver> result = new List<Driver>();
             result.Add(new Driver() { Path = settingsJson.ChromeDriverPath, Title = WebDriverType.Chrome.ToString() });
             result.Add(new Driver() { Path = settingsJson.FirefoxDriverPath, Title = WebDriverType.Firefox.ToString() });
-            //result.Add(new Driver() { Path = settingsJson.EdgeDriverPath, Title = WebDriverType.Edge.ToString() });
             return result;
         }
     }
