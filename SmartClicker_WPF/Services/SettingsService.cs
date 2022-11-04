@@ -14,15 +14,13 @@ namespace SmartClicker_WPF.Services
         public static string SavePath = "settings.json";
 
         public SettingsJson LoadDefaultSettingsObject()
-            => new SettingsJson()
+            => new ()
             {
-                //EdgeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "edgedriver_win64",
                 FirefoxDriverPath = AppDomain.CurrentDomain.BaseDirectory + "geckodriver-v0.32.0-win32",
                 ChromeDriverPath = AppDomain.CurrentDomain.BaseDirectory + "chromedriver_win32",
                 TimeOut_CookieButton = 7,
                 TimeOut_SearchBar = 7,
                 TimeOut_SearchButton = 7,
-                TimeOut_SearchSite = 10,
                 TimeOut_NavTable = 10,
                 TimeOut_Page = 5,
                 TimeOut_PageLoad = 60,
@@ -33,8 +31,7 @@ namespace SmartClicker_WPF.Services
                 MaxPageCount = 20,
                 HideConsole = true,
                 HideBrowser = true,
-                RandomDelayBetweenActivity = true,
-                GoogleDismisButtonId = "dismiss-button"
+                RandomDelayBetweenActivity = true
             };
         private string FullSavePath => AppDomain.CurrentDomain.BaseDirectory + SavePath;
 

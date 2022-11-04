@@ -21,8 +21,8 @@
         ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance Type=vm:ClickerSettingsVM}"
         Title="Clicker settings"
-        Height="500" Width="700"
-        MinHeight="500" MinWidth="600">
+        Height="450" Width="700"
+        MinHeight="450" MinWidth="600">
     <Grid Margin="2">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -60,10 +60,10 @@
                                        TextValueS="Find google 'search button'"
                                        TooltipValueS="The time during which the search button will be found"
                                        TextBoxValueS="{Binding TimeOut_SearchButton}" />
-                    <user:SettingsBoxS DockPanel.Dock="Top"
+                    <!--<user:SettingsBoxS DockPanel.Dock="Top"
                                        TextValueS="Search for site link"
                                        TooltipValueS="The time during which a link to the site will be expected to appear in the search result"
-                                       TextBoxValueS="{Binding TimeOut_SearchSite}" />
+                                       TextBoxValueS="{Binding TimeOut_SearchSite}" />-->
                     <user:SettingsBoxS DockPanel.Dock="Top"
                                        TextValueS="Search for google nav-table"
                                        TooltipValueS="The time during which there is a list of pages at the bottom of the search result page"

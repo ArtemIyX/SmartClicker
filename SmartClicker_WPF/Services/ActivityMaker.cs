@@ -33,9 +33,9 @@ namespace SmartClicker_WPF.Services
         public int LinkClickTimeoutS { get; set; } = 10;
         //Find ad banner
         public int FindLinkTimeoutS { get; set; } = 2;
-        public int DelayBettwenActivityMs { get; set; } = 500;
+        public int DelayBetweenActivityMs { get; set; } = 500;
 
-        private int DelayMS => UseRandomDelay ? MakerRandom.Next(DelayBettwenActivityMs / 5, DelayBettwenActivityMs + (DelayBettwenActivityMs / 2)) : DelayBettwenActivityMs;
+        private int DelayMS => UseRandomDelay ? MakerRandom.Next(DelayBetweenActivityMs / 5, DelayBetweenActivityMs + (DelayBetweenActivityMs / 2)) : DelayBetweenActivityMs;
 
         public bool UseRandomDelay { get;set; }
         //Pop-up ad

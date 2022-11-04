@@ -221,7 +221,21 @@ namespace SmartClicker_WPF.ViewModels
                    _loops,
                    _detects);
             }
-            Tasker.MaxPageCount = 20;
+            // Init values
+            Tasker.MaxPageCount = SettingsJson.MaxPageCount;
+            Tasker.FindCookieButtonTimeOutS = SettingsJson.TimeOut_CookieButton;
+            Tasker.FindSearchBarTimeOutS = SettingsJson.TimeOut_SearchBar;
+            Tasker.FindSearchButtonTimeOutS = SettingsJson.TimeOut_SearchButton;
+            Tasker.NavTableSearchTiemOutS = SettingsJson.TimeOut_NavTable;
+            Tasker.PageSearchTimeOutS = SettingsJson.TimeOut_Page;
+            Tasker.PageLoadTimeOutS = SettingsJson.TimeOut_PageLoad;
+            Tasker.TimeOutFindLink = SettingsJson.TimeOut_FindLink;
+            Tasker.TimeOutLinkClick = SettingsJson.TimeOut_LinkClick;
+            Tasker.MaxPageCount = SettingsJson.MaxPageCount;
+            Tasker.DelayBetweenActivity = SettingsJson.DelayBetweenActivityMs;
+            Tasker.RandomDelayBetweenActivity = SettingsJson.RandomDelayBetweenActivity;
+
+            // Subscribe
             Tasker.OnAdClicksChanged += Tasker_OnAdClicksChanged;
             Tasker.OnStatusChanged += Tasker_OnStatusChanged;
             Tasker.OnIterationChanged += Tasker_OnIterationChanged;

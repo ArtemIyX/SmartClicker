@@ -27,7 +27,7 @@ namespace SmartClicker_WPF.Models
         public int TimeOut_CookieButton { get; set; }
         public int TimeOut_SearchBar { get; set; }
         public int TimeOut_SearchButton { get; set; }
-        public int TimeOut_SearchSite { get; set; }
+        //public int TimeOut_SearchSite { get; set; }
         public int TimeOut_NavTable { get; set; }
         public int TimeOut_Page { get; set; }
         public int TimeOut_PageLoad { get; set; }
