@@ -1,20 +1,14 @@
-﻿using CommunityToolkit.Mvvm;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SmartClicker_WPF.Interfaces;
 using SmartClicker_WPF.Models;
 using SmartClicker_WPF.Services;
 using SmartClicker_WPF.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace SmartClicker_WPF.ViewModels
 {
@@ -28,17 +22,14 @@ namespace SmartClicker_WPF.ViewModels
         private WebService _webService;
         private InputService _inputService;
         private CancellationTokenSource? _cancellationTokenSource;
-        public WebTasker Tasker { get; private set; }
+        public WebTasker? Tasker { get; private set; }
 
-        private static string StartButtonLabel = "Start";
-        private static string CancelButtonLabel = "Cancel";
-
-        public MainVM(WebService WebService, InputService inputService, SettingsService SettingsService, FooManager FooManager, ProxyService ProxyService)
+        public MainVM(WebService webService, InputService inputService, SettingsService settingsService, FooManager fooManager, ProxyService proxyService)
         {
-            _webService = WebService;
-            _settingsService = SettingsService;
-            _fooManager = FooManager;
-            _proxyService = ProxyService;
+            _webService = webService;
+            _settingsService = settingsService;
+            _fooManager = fooManager;
+            _proxyService = proxyService;
             _inputService = inputService;
             SettingsJson = _settingsService.GetSettingsObject();
 
@@ -123,7 +114,7 @@ namespace SmartClicker_WPF.ViewModels
         private string _currentProxy;
 
         [RelayCommand]
-        public void RemoveDetect(object sender)
+        private void RemoveDetect(object sender)
         {
             if (Detects.Count <= 0)
                 throw new Exception("No list box items (Ad detects)");
@@ -136,14 +127,14 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public void AddDetect()
+        private void AddDetect()
         {
             AdDetect adDetect = new AdDetect();
             Detects.Add(adDetect);
         }
 
         [RelayCommand]
-        public async Task OpenDriverSettings()
+        private async Task OpenDriverSettings()
         {
             DriverSettingsWindow? window = _fooManager.ServiceProvider.GetService(typeof(DriverSettingsWindow)) as DriverSettingsWindow;
             if (window == null)
@@ -184,10 +175,13 @@ namespace SmartClicker_WPF.ViewModels
         private async Task Start()
         {
             CheckBeforeStart();
-
+        
             _cancellationTokenSource = new CancellationTokenSource();
             CancellationToken ct = _cancellationTokenSource.Token;
 
+            //Clear logs
+            Logs = new ObservableCollection<LogModel>();
+            
             if (_useProxy)
             {
                 var proxies = _proxyList.Split("\r\n");
@@ -234,6 +228,8 @@ namespace SmartClicker_WPF.ViewModels
             Tasker.MaxPageCount = SettingsJson.MaxPageCount;
             Tasker.DelayBetweenActivity = SettingsJson.DelayBetweenActivityMs;
             Tasker.RandomDelayBetweenActivity = SettingsJson.RandomDelayBetweenActivity;
+            Tasker.HideBrowser = SettingsJson.HideBrowser;
+            Tasker.HideConsole = SettingsJson.HideConsole;
 
             // Subscribe
             Tasker.OnAdClicksChanged += Tasker_OnAdClicksChanged;
@@ -265,7 +261,12 @@ namespace SmartClicker_WPF.ViewModels
             CurrentProxy = proxy;
         }
 
-        public bool CanStart() => Tasker == null || (Tasker != null && !Tasker.IsInProgress);
+        public bool CanStart()
+        {
+            if (Tasker == null)
+                return false;
+            return !Tasker.IsInProgress;
+        }
 
         private void CheckBeforeStart()
         {
@@ -288,6 +289,7 @@ namespace SmartClicker_WPF.ViewModels
             Logs.Add(new LogModel() { Log = text });
             SelectedLogIndex = (Logs.Count - 1);
         }
+        
 
         private void Tasker_OnLog(string log)
         {

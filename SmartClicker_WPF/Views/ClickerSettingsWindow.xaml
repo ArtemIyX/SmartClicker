@@ -98,11 +98,11 @@
                 </Grid.RowDefinitions>
                 <GroupBox Header="Timeouts (ms)" Margin="2">
                     <DockPanel VerticalAlignment="Top">
-                        <user:SettingsBoxMS DockPanel.Dock="Top"
+                        <user:SettingsBoxMs DockPanel.Dock="Top"
                                             TextValueMS="Proxy respond time"
                                             TooltipValueMS="Maximum proxy response time"
                                             TextBoxValueMS="{Binding TimeOut_ProxyCheckerMs}" />
-                        <user:SettingsBoxMS DockPanel.Dock="Top"
+                        <user:SettingsBoxMs DockPanel.Dock="Top"
                                             TextValueMS="Activity delay"
                                             TooltipValueMS="Delay between clicks and scrolls"
                                             TextBoxValueMS="{Binding DelayBetweenActivityMs}" />

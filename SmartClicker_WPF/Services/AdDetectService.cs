@@ -9,10 +9,6 @@ namespace SmartClicker_WPF.Services
 {
     public class AdDetectService
     {
-        public AdDetectService()
-        {
-
-        }
 
         public ICollection<AdDetectType> GetAddDetectTypes() => Enum.GetValues<AdDetectType>();
 

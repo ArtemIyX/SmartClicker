@@ -1,24 +1,18 @@
-﻿using OpenQA.Selenium;
-using SmartClicker_WPF.Models;
+﻿using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-using static System.Net.WebRequestMethods;
 
 namespace SmartClicker_WPF.Services
 {
 
     public class ProxyService
     {
-        private static string ProxyCheckApiUrl = @"http://ip-api.com/json/?fields=61439";
+        private static readonly string ProxyCheckApiUrl = @"http://ip-api.com/json/?fields=61439";
         public ICollection<WebProxyType> GetProxyTypes()
             => Enum.GetValues<WebProxyType>();
 
@@ -56,40 +50,38 @@ namespace SmartClicker_WPF.Services
         }
         private async Task<bool> TrySendRequest(HttpClientHandler clientHandler, int timeOutMs, CancellationToken cancellationToken)
         {
-            using (var httpClient = new HttpClient(handler: clientHandler, disposeHandler: true)
+            using var httpClient = new HttpClient(handler: clientHandler, disposeHandler: true)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeOutMs)
-            })
+            };
+            try
             {
-                try
-                {
-                    var response = await httpClient.GetAsync(ProxyCheckApiUrl, cancellationToken);
-                    return true;
-                }
-                catch(TaskCanceledException ex)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    return false;
-                }
-                catch
-                {
-                    return false;
-                }
+                /*HttpResponseMessage response =*/ await httpClient.GetAsync(ProxyCheckApiUrl, cancellationToken);
+                return true;
+            }
+            catch(TaskCanceledException)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return false;
+            }
+            catch
+            {
+                return false;
             }
         }
 
         public async Task<bool> CheckProxy(CancellationToken cancellationToken, string proxy, int timeOutMs)
         {
-            var port_ip = proxy.Split(":");
-            var httpClientHandler = CreateProxyHandler(port_ip[0], port_ip[1]);
+            string[] portIp = proxy.Split(":");
+            HttpClientHandler httpClientHandler = CreateProxyHandler(portIp[0], portIp[1]);
             return await TrySendRequest(httpClientHandler, timeOutMs, cancellationToken);
             
         }
 
         public async Task<bool> CheckProxy(CancellationToken cancellationToken, string proxy, int timeOutMs, string username, string password)
         {
-            var port_ip = proxy.Split(":");
-            var httpClientHandler = CreateProxyHandler(port_ip[0], port_ip[1], username, password);
+            string[] portIp = proxy.Split(":");
+            HttpClientHandler httpClientHandler = CreateProxyHandler(portIp[0], portIp[1], username, password);
             return await TrySendRequest(httpClientHandler, timeOutMs, cancellationToken);
 
         }

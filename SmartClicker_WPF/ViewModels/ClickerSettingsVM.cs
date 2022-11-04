@@ -1,19 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using OpenQA.Selenium.DevTools.V104.Emulation;
 using SmartClicker_WPF.Interfaces;
 using SmartClicker_WPF.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SmartClicker_WPF.Services;
 
 namespace SmartClicker_WPF.ViewModels
 {
     [ObservableObject]
-    public partial class ClickerSettingsVM : ISettingsVM
+    public partial class ClickerSettingsVM : ISettingsVm
     {
         private readonly SettingsService _settingsService;
         public ClickerSettingsVM(SettingsService settingsService)
@@ -25,7 +19,6 @@ namespace SmartClicker_WPF.ViewModels
             TimeOut_CookieButton = settingsJson.TimeOut_CookieButton.ToString();
             TimeOut_SearchBar = settingsJson.TimeOut_SearchBar.ToString();
             TimeOut_SearchButton = settingsJson.TimeOut_SearchButton.ToString();
-            //TimeOut_SearchSite = settingsJson.TimeOut_SearchSite.ToString();
             TimeOut_NavTable = settingsJson.TimeOut_NavTable.ToString();
             TimeOut_PageLoad = settingsJson.TimeOut_PageLoad.ToString();
             TimeOut_Page = settingsJson.TimeOut_Page.ToString();
@@ -44,7 +37,6 @@ namespace SmartClicker_WPF.ViewModels
             settingsJson.TimeOut_CookieButton = GetValueSave(TimeOut_CookieButton, settingsJson.TimeOut_CookieButton);
             settingsJson.TimeOut_SearchBar = GetValueSave(TimeOut_SearchBar, settingsJson.TimeOut_SearchBar);
             settingsJson.TimeOut_SearchButton = GetValueSave(TimeOut_SearchButton, settingsJson.TimeOut_SearchButton);
-            //settingsJson.TimeOut_SearchSite = GetValueSave(TimeOut_SearchSite, settingsJson.TimeOut_SearchSite);
             settingsJson.TimeOut_NavTable = GetValueSave(TimeOut_NavTable, settingsJson.TimeOut_NavTable);
             settingsJson.TimeOut_PageLoad = GetValueSave(TimeOut_PageLoad, settingsJson.TimeOut_PageLoad);
             settingsJson.TimeOut_Page = GetValueSave(TimeOut_Page, settingsJson.TimeOut_Page);

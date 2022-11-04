@@ -1,20 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Interactions.Internal;
-using OpenQA.Selenium.Support.UI;
+﻿using OpenQA.Selenium;
 using SmartClicker_WPF.Extensions;
 using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Configuration;
-using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Printing;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +17,7 @@ namespace SmartClicker_WPF.Services
         private readonly WebDriver _driver;
         private CancellationTokenSource _cancelTokenSource;
         private CancellationToken _cancellationToken;
-        public static Random MakerRandom;
+        private static readonly Random MakerRandom;
 
         //wait until new page with another url is loaded
         public int LinkClickTimeoutS { get; set; } = 10;
@@ -35,11 +25,13 @@ namespace SmartClicker_WPF.Services
         public int FindLinkTimeoutS { get; set; } = 2;
         public int DelayBetweenActivityMs { get; set; } = 500;
 
-        private int DelayMS => UseRandomDelay ? MakerRandom.Next(DelayBetweenActivityMs / 5, DelayBetweenActivityMs + (DelayBetweenActivityMs / 2)) : DelayBetweenActivityMs;
+        private int DelayMs => UseRandomDelay ? 
+            MakerRandom.Next(DelayBetweenActivityMs / 5, DelayBetweenActivityMs + (DelayBetweenActivityMs / 2)) 
+            : DelayBetweenActivityMs;
 
         public bool UseRandomDelay { get;set; }
         //Pop-up ad
-        public string GoogleDismisButtonId { get; set; } = "dismiss-button";
+        private string GoogleDismisButtonId { get; set; } = "dismiss-button";
 
         static ActivityMaker()
         {
@@ -71,7 +63,7 @@ namespace SmartClicker_WPF.Services
                 bool result = await GoToRandomLink();
                 if (result)
                 {
-                    await Task.Delay(DelayMS);
+                    await Task.Delay(DelayMs);
                 }
                 else
                 {
@@ -83,16 +75,21 @@ namespace SmartClicker_WPF.Services
         private (IWebElement? frame, IWebElement? buttonDiv) CheckForPopUpAd()
         {
             ReadOnlyCollection<IWebElement>? iframes = _driver.FindElementsSave(By.TagName("iframe"));
-            foreach (var f in iframes)
+
+            if (iframes != null)
             {
-                _driver.SwitchTo().Frame(f);
-                IWebElement? dismisButton = _driver.FindElementSave(By.Id(GoogleDismisButtonId));
-                _driver.SwitchTo().DefaultContent();
-                if(dismisButton != null)
+                foreach (var f in iframes)
                 {
-                    return (frame: f, buttonDiv: dismisButton);
+                    _driver.SwitchTo().Frame(f);
+                    IWebElement? dismisButton = _driver.FindElementSave(By.Id(GoogleDismisButtonId));
+                    _driver.SwitchTo().DefaultContent();
+                    if (dismisButton != null)
+                    {
+                        return (frame: f, buttonDiv: dismisButton);
+                    }
                 }
             }
+
             return (null, null);
         }
 
@@ -110,7 +107,7 @@ namespace SmartClicker_WPF.Services
             }
             catch
             {
-
+                // ignored
             }
             finally
             {
@@ -157,7 +154,7 @@ namespace SmartClicker_WPF.Services
                     return false;
                 }
 
-                await Task.Delay(DelayMS);
+                await Task.Delay(DelayMs);
                 // Find new element in site
                 bool loadedNewPage = await WaitUntilNewPageIsLoaded(currentUrl);
                 if (!loadedNewPage)
@@ -188,7 +185,7 @@ namespace SmartClicker_WPF.Services
                     //And has div
                     return drv.FindElementSave(By.TagName("div"));
                 }
-            });
+            }, _cancellationToken);
             return (newElement != null);
         }
 
@@ -277,15 +274,13 @@ namespace SmartClicker_WPF.Services
                 default:
                     return true;
             }
-
-            return true;
         }
 
         private static Func<IWebDriver, IWebElement?> GetAdCondition(AdDetect adDetect)
         {
             if (!CheckIfAdIsCorrect(adDetect))
             {
-                throw new ArgumentException("adDetect", "Incorrect format");
+                throw new ArgumentException("Incorrect format", nameof(adDetect));
             }
             switch (adDetect.Type)
             {
@@ -330,7 +325,7 @@ namespace SmartClicker_WPF.Services
                         return resultElements.RandomElement();
                     };
                 // Custom CSS
-                case AdDetectType.CSS:
+                case AdDetectType.Css:
                     return drv => drv.FindElementSave(By.CssSelector(adDetect.Value));
                 // Custom Xpath
                 case AdDetectType.XPath:
@@ -347,7 +342,7 @@ namespace SmartClicker_WPF.Services
                 ReadOnlyCollection<IWebElement>? iframes = _driver.FindElementsSave(By.TagName("iframe"));
                 if (iframes == null)
                     return (null, null);
-                if (iframes.Count() == 0)
+                if (!iframes.Any())
                     return (null, null);
 
                 int n = iframes.Count(); 
@@ -356,7 +351,7 @@ namespace SmartClicker_WPF.Services
                     n--;
                     var iframe = iframes.RandomElement();
                     _driver.SwitchTo().Frame(iframe);
-                    IWebElement? link = await _driver.FindElementAsync(FindLinkTimeoutS, GetAdCondition(adDetect));
+                    IWebElement? link = await _driver.FindElementAsync(FindLinkTimeoutS, GetAdCondition(adDetect), _cancellationToken);
                     _driver.SwitchTo().DefaultContent();
                     if (link != null)
                     {
@@ -388,13 +383,13 @@ namespace SmartClicker_WPF.Services
             int seconds, ICollection<AdDetect> adDetects)
         {
             if (adDetects == null)
-                throw new ArgumentNullException("adDetects");
+                throw new ArgumentNullException(nameof(adDetects));
             if (adDetects.Count == 0)
-                throw new ArgumentException("adDetets", "No detects");
+                throw new ArgumentException ("No detects", nameof(adDetects));
 
             _cancelTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancelTokenSource.Token;
-            _cancelTokenSource.CancelAfter(seconds * 1000); ;
+            _cancelTokenSource.CancelAfter(seconds * 1000); 
 
             while (true)
             {
@@ -409,7 +404,7 @@ namespace SmartClicker_WPF.Services
                     return (result.iframe, result.banner);
                 }
                 await GoToRandomLink();
-                await Task.Delay(DelayMS);
+                await Task.Delay(DelayMs, _cancellationToken);
             }
         }
     }

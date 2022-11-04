@@ -1,15 +1,11 @@
 ﻿using OpenQA.Selenium;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace SmartClicker_WPF.Extensions
 {
-    internal class Waiter
+    public class Waiter
     {
         private readonly IWebDriver _webDriver;
         private readonly int _timeOut;
@@ -19,7 +15,7 @@ namespace SmartClicker_WPF.Extensions
         private CancellationToken _cancellationToken;
         private Task<IWebElement>? _task;
 
-        public int SleepingDelayMs { get; set; } = 500;
+        private int SleepingDelayMs { get; set; } = 500;
         public Waiter(IWebDriver webDriver, int timeOutS, Func<IWebDriver, IWebElement?> condition)
         {
             _webDriver = webDriver;
@@ -40,7 +36,7 @@ namespace SmartClicker_WPF.Extensions
 
             if (_condition == null)
             {
-                throw new ArgumentNullException("condition", "condition cannot be null");
+                throw new ArgumentNullException(nameof(ct), "condition cannot be null");
             }
 
             //Init cancelation
@@ -54,7 +50,7 @@ namespace SmartClicker_WPF.Extensions
             IWebElement? el;
             try
             {
-                _task = Task<IWebElement>.Run(() =>
+                _task = Task.Run(() =>
                 {
                     while (true)
                     {
@@ -67,9 +63,9 @@ namespace SmartClicker_WPF.Extensions
                         {
                             return element;
                         }
-                        Task.Delay(SleepingDelayMs);
+                        Task.Delay(SleepingDelayMs, ct);
                     }
-                });
+                }, ct);
                 el = await _task;
             }
             //But if it is error (time out exception for example)

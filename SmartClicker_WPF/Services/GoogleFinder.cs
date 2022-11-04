@@ -1,14 +1,9 @@
-﻿using MaterialDesignColors;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
 using OpenQA.Selenium;
 using SmartClicker_WPF.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SmartClicker_WPF.Finders
+namespace SmartClicker_WPF.Services
 {
     public static class GoogleFinder
     {
@@ -68,14 +63,13 @@ namespace SmartClicker_WPF.Finders
                 //{
                 //In attribute 'aria-lable' we have "Page N"
                 string href = link.GetAttribute("href");
-                string aria_lable = link.GetAttribute("aria-label");
-                if (!string.IsNullOrEmpty(aria_lable))
+                string ariaLable = link.GetAttribute("aria-label");
+                if (!string.IsNullOrEmpty(ariaLable))
                 {
                     //Let's split our aria-lable by space
-                    string[] splited = aria_lable.Split(" ");
-                    int pageNum;
+                    string[] splited = ariaLable.Split(" ");
                     //Second string will be our number
-                    if (int.TryParse(splited[1], out pageNum))
+                    if (int.TryParse(splited[1], out int pageNum))
                     {
                         if (pageNum == page)
                         {
@@ -92,9 +86,9 @@ namespace SmartClicker_WPF.Finders
         public static IWebElement? FindUrlInSearch(IWebDriver driver, string url)
         {
             //Div with id 'rso' is div with results of searching
-            IWebElement div_rso = driver.FindElement(By.Id("rso"));
+            IWebElement divRso = driver.FindElement(By.Id("rso"));
             //Let's find all links
-            ReadOnlyCollection<IWebElement>? links = div_rso.FindElementsSave(By.TagName("a"));
+            ReadOnlyCollection<IWebElement>? links = divRso.FindElementsSave(By.TagName("a"));
             if (links == null) return null;
             foreach (var a in links)
             {
@@ -114,21 +108,21 @@ namespace SmartClicker_WPF.Finders
         public static IWebElement? GetGooglePageTable(IWebDriver driver)
         {
             //Our table is located in div with id 'dotstuff'
-            IWebElement? div_botstuff = driver.FindElementSave(By.Id("botstuff"));
-            if (div_botstuff == null)
+            IWebElement? divBotstuff = driver.FindElementSave(By.Id("botstuff"));
+            if (divBotstuff == null)
                 return null;
             //If page is not loaded there are no tables
-            ReadOnlyCollection<IWebElement>? tables = div_botstuff.FindElements(By.TagName("table"));
+            ReadOnlyCollection<IWebElement>? tables = divBotstuff.FindElements(By.TagName("table"));
             if (tables == null)
                 return null;
             if (tables.Count == 0)
                 return null;
             //Table must be one
-            IWebElement first_talbe = tables.First();
+            IWebElement firstTalbe = tables.First();
             //And this table has attribute role
-            if (first_talbe.GetAttribute("role") == "presentation")
+            if (firstTalbe.GetAttribute("role") == "presentation")
             {
-                return first_talbe;
+                return firstTalbe;
             }
             return null;
         }

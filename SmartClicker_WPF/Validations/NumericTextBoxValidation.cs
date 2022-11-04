@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using System.Windows.Controls;
 
 namespace SmartClicker_WPF.Validations
 {
     public class NumericTextBoxValidation : ValidationRule
     {
-        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        public override ValidationResult Validate(object? value, CultureInfo cultureInfo)
         {
-
             if (value is null)
                 return new ValidationResult(false, "Not empty");
 

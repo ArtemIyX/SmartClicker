@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.Interfaces
 {
-    public interface ISettingsVM
+    public interface ISettingsVm
     {
         public void InsertSettings(SettingsJson settingsJson);
         public void ModifySettings(SettingsJson settingsJson);

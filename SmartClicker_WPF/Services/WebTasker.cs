@@ -3,7 +3,6 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using SmartClicker_WPF.Extensions;
-using SmartClicker_WPF.Finders;
 using SmartClicker_WPF.Models;
 using System;
 using System.Collections;

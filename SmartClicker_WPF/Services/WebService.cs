@@ -1,42 +1,36 @@
-﻿using Newtonsoft.Json.Linq;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Chrome.ChromeDriverExtensions;
-using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using SeleniumProxyAuthentication;
 using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Proxy = OpenQA.Selenium.Proxy;
 
 namespace SmartClicker_WPF.Services
 {
     public class WebService
     {
-        public int TimeOutSec { get; set; }
+        private int TimeOutSec { get; set; }
 
         public WebService()
         {
             TimeOutSec = 120;
         }
 
-        private SeleniumProxyAuthentication.ProxyProtocols ToLibProtocol(WebProxyType webProxyType)
+        private ProxyProtocols ToLibProtocol(WebProxyType webProxyType)
         {
             switch (webProxyType)
             {
                 case WebProxyType.Https:
-                    return SeleniumProxyAuthentication.ProxyProtocols.HTTPS;
+                    return ProxyProtocols.HTTPS;
                 case WebProxyType.Socks4:
-                    return SeleniumProxyAuthentication.ProxyProtocols.SOCKS5;
+                    return ProxyProtocols.SOCKS5;
                 case WebProxyType.Socks5:
-                    return SeleniumProxyAuthentication.ProxyProtocols.SOCKS5;
+                    return ProxyProtocols.SOCKS5;
             }
 
-            return SeleniumProxyAuthentication.ProxyProtocols.HTTP;
+            return ProxyProtocols.HTTP;
         }
 
         private OpenQA.Selenium.Proxy CreateProxy(WebProxyType type, string ip)
@@ -161,7 +155,6 @@ namespace SmartClicker_WPF.Services
             chromeDriverService.HideCommandPromptWindow = hideConsole;
             return new ChromeDriver(chromeDriverService,
                 CreateChromeOptions(hideBrowser), TimeSpan.FromSeconds(TimeOutSec));
-            ;
         }
 
         public ChromeDriver CreateChromeDriverWithProxy(string path,
@@ -179,7 +172,6 @@ namespace SmartClicker_WPF.Services
             return new ChromeDriver(chromeDriverService,
                 options,
                 TimeSpan.FromSeconds(TimeOutSec));
-            ;
         }
 
         public ChromeDriver CreateChromeDriverWithPrivateProxy(string path,
@@ -208,7 +200,6 @@ namespace SmartClicker_WPF.Services
             return new ChromeDriver(chromeDriverService,
                 options,
                 TimeSpan.FromSeconds(TimeOutSec));
-            ;
         }
 
         public FirefoxDriver CreateFirefoxDriver(string path,
@@ -229,6 +220,7 @@ namespace SmartClicker_WPF.Services
             firefoxDriverService.HideCommandPromptWindow = hideConsole;
             FirefoxOptions options = CreateFireFoxOptions(hideBrowser);
             OpenQA.Selenium.Proxy proxy = CreateProxy(webProxyType, ip);
+            options.Proxy = proxy;
             return new FirefoxDriver(firefoxDriverService, options, TimeSpan.FromSeconds(TimeOutSec));
         }
 

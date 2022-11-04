@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
+﻿using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Markup;
 
@@ -15,7 +9,7 @@ namespace SmartClicker_WPF.Converters
         /// <summary>
         /// Converts from XAML markup to a WPF FlowDocument.
         /// </summary>
-        public object Convert(object value, System.Type targetType,
+        public object Convert(object? value, System.Type targetType,
         object parameter, System.Globalization.CultureInfo culture)
         {
             /* See http://stackoverflow.com/questions/897505/
@@ -35,7 +29,7 @@ namespace SmartClicker_WPF.Converters
         /// <summary>
         /// Converts from a WPF FlowDocument to a XAML markup string.
         /// </summary>
-        public object ConvertBack(object value, System.Type targetType,
+        public object ConvertBack(object? value, System.Type targetType,
         object parameter, System.Globalization.CultureInfo culture)
         {
             /* This converter does not insert returns or indentation into the XAML. 
@@ -43,7 +37,8 @@ namespace SmartClicker_WPF.Converters
              * see http://www.knowdotnet.com/articles/indentxml.html */
 
             // Exit if FlowDocument is null
-            if (value == null) return string.Empty;
+            if (value == null)
+                return string.Empty;
 
             // Get flow document from value passed in
             var flowDocument = (FlowDocument)value;

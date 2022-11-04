@@ -10,8 +10,8 @@ namespace SmartClicker_WPF.Validations
 {
     public class TimeOutMiliSecondsBoxValidation : ValidationRule
     {
-        private static int RangeMax = 25000;
-        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        private static readonly int RangeMax = 25000;
+        public override ValidationResult Validate(object? value, CultureInfo cultureInfo)
         {
             if (value is null)
                 return new ValidationResult(false, "Not empty");

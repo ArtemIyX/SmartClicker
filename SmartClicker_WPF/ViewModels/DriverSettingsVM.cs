@@ -5,15 +5,11 @@ using SmartClicker_WPF.Interfaces;
 using SmartClicker_WPF.Models;
 using SmartClicker_WPF.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.ViewModels
 {
     [ObservableObject]
-    public partial class DriverSettingsVM : ISettingsVM
+    public partial class DriverSettingsVM : ISettingsVm
     {
         private readonly SettingsService _settingsService;
         public DriverSettingsVM(SettingsService settingsService)

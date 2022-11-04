@@ -42,5 +42,6 @@ namespace SmartClicker_WPF
             viewmodel.Tasker?.FinishWork("Window is closing");
             _settingsService.SaveSettingsObject(viewmodel.SettingsJson);
         }
+        
     }
 }

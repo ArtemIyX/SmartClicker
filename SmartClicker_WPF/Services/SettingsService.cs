@@ -3,15 +3,13 @@ using SmartClicker_WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SmartClicker_WPF.Services
 {
     public class SettingsService
     {
-        public static string SavePath = "settings.json";
+        private static readonly string SavePath = "settings.json";
 
         public SettingsJson LoadDefaultSettingsObject()
             => new ()
@@ -37,8 +35,8 @@ namespace SmartClicker_WPF.Services
 
         public SettingsJson GetSettingsObject()
         {
-            string content = "";
-            SettingsJson? settings = null;
+            string content;
+            SettingsJson? settings;
 
             if (File.Exists(FullSavePath))
             {
@@ -61,8 +59,8 @@ namespace SmartClicker_WPF.Services
         public async Task<SettingsJson?> GetSettingsObjectAsync()
         {
             string fullPath = AppDomain.CurrentDomain.BaseDirectory + SavePath;
-            string content = "";
-            SettingsJson? settings = null;
+            string content;
+            SettingsJson? settings;
 
             if (File.Exists(fullPath))
             {

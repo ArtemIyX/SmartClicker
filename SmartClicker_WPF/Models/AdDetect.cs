@@ -14,7 +14,7 @@ namespace SmartClicker_WPF.Models
         AttributeValue, //id="5"
         HasClass,       //img_ad
         ContainsUrl,     //googleads
-        CSS,            //.h
+        Css,            //.h
         XPath           // //*[@id="id"]
     }
 
@@ -36,16 +36,15 @@ namespace SmartClicker_WPF.Models
                     return "jar";
                 case AdDetectType.ContainsUrl:
                     return "googleads";
-                case AdDetectType.CSS:
+                case AdDetectType.Css:
                     return "#content";
                 case AdDetectType.XPath:
                     return "//*[@id=\"id\"]\r\n    }\r\n";
             }
             return "";
         }
-        [ObservableProperty]
-        public string _hint = "div";
-
+        [ObservableProperty] 
+        private string _hint = "div";
         public List<string> Types => Enum.GetValues<AdDetectType>().Select(x => x.ToString()).ToList();
 
         private int _selectedIndex = 0;

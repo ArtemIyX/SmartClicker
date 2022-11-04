@@ -23,8 +23,8 @@ namespace SmartClicker_WPF.UserControls
 
         public string TextValueS
         {
-            get { return (string)GetValue(TextValueSProperty); }
-            set { SetValue(TextValueSProperty, value); }
+            get => (string)GetValue(TextValueSProperty);
+            set => SetValue(TextValueSProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for TextValue.  This enables animation, styling, binding, etc...
@@ -33,8 +33,8 @@ namespace SmartClicker_WPF.UserControls
 
         public string TextBoxValueS
         {
-            get { return (string)GetValue(TextBoxValueSProperty); }
-            set { SetValue(TextBoxValueSProperty, value); }
+            get => (string)GetValue(TextBoxValueSProperty);
+            set => SetValue(TextBoxValueSProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for TextBoxValue.  This enables animation, styling, binding, etc...
@@ -44,8 +44,8 @@ namespace SmartClicker_WPF.UserControls
 
         public string TooltipValueS
         {
-            get { return (string)GetValue(TooltipValueSProperty); }
-            set { SetValue(TooltipValueSProperty, value); }
+            get => (string)GetValue(TooltipValueSProperty);
+            set => SetValue(TooltipValueSProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for TooltipValue.  This enables animation, styling, binding, etc...

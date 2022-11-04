@@ -9,8 +9,8 @@ namespace SmartClicker_WPF.Services
 {
     public class InputService
     {
-        private static readonly Regex _onlyNumberRegex = new Regex("[^0-9.-]+"); //regex that matches disallowed text
-        public bool IsOnlyNumberText(string text) => _onlyNumberRegex.IsMatch(text);
+        private static readonly Regex OnlyNumberRegex = new Regex("[^0-9.-]+"); //regex that matches disallowed text
+        public bool IsOnlyNumberText(string text) => OnlyNumberRegex.IsMatch(text);
 
         public List<string> SplitKeyWords(string input) => input.Split("\n\r".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
 
