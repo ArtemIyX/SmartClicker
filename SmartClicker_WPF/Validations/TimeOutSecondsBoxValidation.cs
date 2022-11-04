@@ -3,29 +3,33 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace SmartClicker_WPF.Validations
 {
-    public class NumericTextBoxValidation : ValidationRule
+    public class TimeOutSecondsBoxValidation : ValidationRule
     {
+        private static int RangeMax = 500;
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-
             if (value is null)
                 return new ValidationResult(false, "Not empty");
 
-            if(string.IsNullOrEmpty(value.ToString()))
+            if (string.IsNullOrEmpty(value.ToString()))
                 return new ValidationResult(false, "Not empty");
 
             int i;
-            if (int.TryParse(value.ToString(), out i))
-                return ValidationResult.ValidResult;
+            if (!int.TryParse(value.ToString(), out i))
+                return new ValidationResult(false, "Only numeric");
 
+            if (i > RangeMax)
+                return new ValidationResult(false, $"{RangeMax} Max");
 
-            return new ValidationResult(false, "Only numeric");
+            if (i <= 0)
+                return new ValidationResult(false, $"{1} Min");
+
+            return ValidationResult.ValidResult;
         }
 
     }

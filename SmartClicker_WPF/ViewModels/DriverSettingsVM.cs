@@ -15,7 +15,7 @@ namespace SmartClicker_WPF.ViewModels
     [ObservableObject]
     public partial class DriverSettingsVM : ISettingsVM
     {
-        private SettingsService _settingsService;
+        private readonly SettingsService _settingsService;
         public DriverSettingsVM(SettingsService settingsService)
         {
             _settingsService = settingsService;
@@ -56,11 +56,7 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public void ResetBtn()
-        {
-            SettingsJson settingsJson = _settingsService.LoadDefaultSettingsObject();
-            InsertSettings(settingsJson);
-        }
+        public void ResetBtn() => InsertSettings(_settingsService.LoadDefaultSettingsObject());
 
         [RelayCommand]
         public void ChromeSelect()

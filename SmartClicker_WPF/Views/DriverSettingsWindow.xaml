@@ -63,7 +63,7 @@
                 <ColumnDefinition Width="65"/>
             </Grid.ColumnDefinitions>
         </Grid>
-        <StackPanel Grid.Row="7" 
+        <StackPanel  Grid.Row="5"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right" 
                     VerticalAlignment="Bottom"

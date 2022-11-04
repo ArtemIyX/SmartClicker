@@ -158,7 +158,7 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public async Task OpenClickerSettings()
+        private async Task OpenClickerSettings()
         {
             ClickerSettingsWindow? window = _fooManager.ServiceProvider.GetService(typeof(ClickerSettingsWindow)) as ClickerSettingsWindow;
             if (window == null)
@@ -168,7 +168,7 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand]
-        public void Cancel()
+        private void Cancel()
         {
             if(Tasker == null || (Tasker != null && !Tasker.IsInProgress))
             {
@@ -181,7 +181,7 @@ namespace SmartClicker_WPF.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanStart))]
-        public async Task Start()
+        private async Task Start()
         {
             CheckBeforeStart();
 
