@@ -147,6 +147,8 @@ namespace SmartClicker_WPF.Services
         public bool HideConsole { get; set; }
         public bool HideBrowser { get; set; }
         
+        public bool NeedToClickAds { get; set; }
+        
         public WebTasker(
             CancellationToken cancellationToken,
             WebService webService,
@@ -336,15 +338,18 @@ namespace SmartClicker_WPF.Services
                 State = WebTaskerState.DoingActivityOnSite;
                 await DoSomeActivityFor(_timeOut);
 
-                if (await GoToAdSite(_timeOut))
+                if (NeedToClickAds)
                 {
-                    AdClicks = AdClicks + 1;
-                    State = WebTaskerState.DoingActivityOnAdSite;
-                    await DoSomeActivityFor(_timeOut / 2);
+                    if (await GoToAdSite(_timeOut))
+                    {
+                        AdClicks = AdClicks + 1;
+                        State = WebTaskerState.DoingActivityOnAdSite;
+                        await DoSomeActivityFor(_timeOut / 2);
+                    }
                 }
 
                 _cancellationToken.ThrowIfCancellationRequested();
-                FinishWork("Succes");
+                FinishWork("Success");
             }
             catch (Exception ex)
             {
@@ -388,6 +393,7 @@ namespace SmartClicker_WPF.Services
 
         private async Task<bool> GoToAdSite(int seconds)
         {
+            
             State = WebTaskerState.SearchingForAdBanner;
 
             OnLog.Invoke($"Searching for ad in {_driver.Url} for {seconds}s...");
@@ -610,7 +616,7 @@ namespace SmartClicker_WPF.Services
                 throw new Exception("Can not click on blank area");
             }
 
-            await Task.Delay(RandDelay());
+            await Task.Delay(RandDelay(), _cancellationToken);
         }
 
         // Accept google cookies
@@ -619,8 +625,10 @@ namespace SmartClicker_WPF.Services
             State = WebTaskerState.AcceptingGoogleCookie;
 
             OnLog.Invoke("Looking for cookies button...");
-            IWebElement? cookieButton = await _driver.FindElementAsync(FindCookieButtonTimeOutS,
-                drv => GoogleFinder.GetAcceptCookieButton(drv), _cancellationToken);
+            IWebElement? cookieButton = await _driver.FindElementAsync(
+                FindCookieButtonTimeOutS,
+                drv => GoogleFinder.GetAcceptCookieButton(drv), 
+                _cancellationToken);
 
             _cancellationToken.ThrowIfCancellationRequested();
 

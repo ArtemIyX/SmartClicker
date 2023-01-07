@@ -233,6 +233,7 @@ namespace SmartClicker_WPF.ViewModels
             Tasker.RandomDelayBetweenActivity = SettingsJson.RandomDelayBetweenActivity;
             Tasker.HideBrowser = SettingsJson.HideBrowser;
             Tasker.HideConsole = SettingsJson.HideConsole;
+            Tasker.NeedToClickAds = _clickAd;
 
             // Subscribe
             Tasker.OnAdClicksChanged += Tasker_OnAdClicksChanged;
@@ -267,7 +268,7 @@ namespace SmartClicker_WPF.ViewModels
         public bool CanStart()
         {
             if (Tasker == null)
-                return false;
+                return true;
             return !Tasker.IsInProgress;
         }
 
@@ -283,7 +284,7 @@ namespace SmartClicker_WPF.ViewModels
                 throw new Exception("Incorrect format: Loops");
             if (SelectedDriver == null) 
                 throw new Exception("Selected driver is null");
-            if (Detects.Count <= 0) 
+            if (Detects.Count <= 0 && _clickAd) 
                 throw new Exception("Ad filter not configured");
 
             Tasker = null;

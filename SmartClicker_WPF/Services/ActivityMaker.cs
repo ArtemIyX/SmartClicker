@@ -57,10 +57,10 @@ namespace SmartClicker_WPF.Services
                 int n = MakerRandom.Next(4);
                 for (int i = 0; i < n; ++i)
                 {
-                    await ScrollToRandomElement();
+                    await ScrollToRandomElement(cancellationToken);
                 }
 
-                bool result = await GoToRandomLink();
+                bool result = await GoToRandomLink(cancellationToken);
                 if (result)
                 {
                     await Task.Delay(DelayMs);
@@ -116,7 +116,7 @@ namespace SmartClicker_WPF.Services
         }
 
 
-        private async Task<bool> GoToRandomLink()
+        private async Task<bool> GoToRandomLink(CancellationToken cancellationToken)
         {
             string currentUrl = _driver.Url;
             int i = 500;
@@ -125,9 +125,9 @@ namespace SmartClicker_WPF.Services
                 i--;
 
                 TrySkipPopUp();
-
+                
                 // Pick random url
-                IWebElement? el = SiteFinder.GetRandomLink(_driver);
+                IWebElement? el = await SiteFinder.GetRandomLinkAsync(_driver, _cancellationToken);
 
                 // Web element is correct
                 if (el == null) continue;
@@ -154,19 +154,15 @@ namespace SmartClicker_WPF.Services
                     return false;
                 }
 
-                await Task.Delay(DelayMs);
+                await Task.Delay(DelayMs, cancellationToken);
                 // Find new element in site
                 bool loadedNewPage = await WaitUntilNewPageIsLoaded(currentUrl);
                 if (!loadedNewPage)
-                {
                     return false;
-                }
 
                 // and now our url is different
                 if (currentUrl != _driver.Url)
-                {
                     return true;
-                }
             }
             return false;
         }
@@ -189,18 +185,18 @@ namespace SmartClicker_WPF.Services
             return (newElement != null);
         }
 
-        private async Task<bool> ScrollToRandomElement()
+        private async Task<bool> ScrollToRandomElement(CancellationToken cancellationToken)
         {
             int i = 500;
             while (i > 0)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 i--;
                 IWebElement? el = GetRandomElement();
                 if (el != null)
                 {
                     return await _driver.ScrollTo(el);
                 }
-
             }
             return false;
         }
@@ -403,7 +399,7 @@ namespace SmartClicker_WPF.Services
                 {
                     return (result.iframe, result.banner);
                 }
-                await GoToRandomLink();
+                await GoToRandomLink(_cancellationToken);
                 await Task.Delay(DelayMs, _cancellationToken);
             }
         }

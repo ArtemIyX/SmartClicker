@@ -159,7 +159,8 @@
                                  Style="{DynamicResource MaterialDesignChoiceChipListBox}"
                                  md:ScrollBarAssist.ButtonsVisibility="Visible"
                                  SelectedItem="{Binding SelectedDetect}"
-                                 ItemsSource="{Binding Detects}">
+                                 ItemsSource="{Binding Detects}"
+                                 IsEnabled="{Binding ClickAd}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate DataType="{x:Type mm:AdDetect}">
                                         <Grid>
