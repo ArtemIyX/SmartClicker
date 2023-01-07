@@ -113,6 +113,9 @@ namespace SmartClicker_WPF.ViewModels
         [ObservableProperty]
         private string _currentProxy;
 
+        [ObservableProperty]
+        private bool _clickAd;
+
         [RelayCommand]
         private void RemoveDetect(object sender)
         {
@@ -282,6 +285,8 @@ namespace SmartClicker_WPF.ViewModels
                 throw new Exception("Selected driver is null");
             if (Detects.Count <= 0) 
                 throw new Exception("Ad filter not configured");
+
+            Tasker = null;
         }
 
         private void AddLog(string text)

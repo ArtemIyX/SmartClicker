@@ -48,6 +48,7 @@ namespace SmartClicker_WPF.Services
         private readonly WebService _webService;
         private readonly string _site;
         private readonly string _driverPath;
+
         private readonly int _timeOut;
         private readonly CancellationToken _cancellationToken;
 
@@ -145,7 +146,7 @@ namespace SmartClicker_WPF.Services
         public bool RandomDelayBetweenActivity { get; set; }
         public bool HideConsole { get; set; }
         public bool HideBrowser { get; set; }
-
+        
         public WebTasker(
             CancellationToken cancellationToken,
             WebService webService,
